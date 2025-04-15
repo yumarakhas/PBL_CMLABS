@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('nama_ibu');
             $table->string('alamat_ibu');
-            $table->string('password',8);
+            $table->string('password');
             $table->timestamps();
         });
     }
