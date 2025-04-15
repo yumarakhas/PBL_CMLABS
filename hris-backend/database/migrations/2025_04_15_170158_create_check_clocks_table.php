@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('aktivitas_pegawai', function (Blueprint $table) {
+        Schema::create('check_clocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_pegawai')->constrained('informasi_pegawai')->onDelete('cascade');
-            $table->string('nama_aktifitas');
-            $table->time('tanggal_aktifitas');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->integer('check_clock_type');
+            $table->time('check_clock_time');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('aktivitas_pegawai');
+        Schema::dropIfExists('check_clocks');
     }
 };

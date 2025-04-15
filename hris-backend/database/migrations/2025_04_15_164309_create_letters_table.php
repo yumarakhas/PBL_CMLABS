@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jadwal_jam_kerja', function (Blueprint $table) {
+        Schema::create('letters', function (Blueprint $table) {
             $table->id();
-            $table->string('jenis');
-            $table->time('jam_masuk');
-            $table->time('jam_selesai');
-            $table->time('jam_istirahat');
-            $table->string('Hari_kerja');
+            $table->foreignId('letter_format_id')->constrained('letter_formats')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('name');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jadwal_jam_kerja');
+        Schema::dropIfExists('letters');
     }
 };

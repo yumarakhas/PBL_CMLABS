@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dokumen_pegawai', function (Blueprint $table) {
+        Schema::create('letter_formats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_pegawai')->constrained('informasi_pegawai')->onDelete('cascade');
-            $table->string('nama_dokumen');
-            $table->time('tanggal_upload');
-            $table->string('file_dokumen');
+            $table->string('name');
+            $table->text('content');
+            $table->integer('status');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dokumen_pegawai');
+        Schema::dropIfExists('letter_formats');
     }
 };

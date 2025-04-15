@@ -11,15 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gaji_pegawai', function (Blueprint $table) {
+        Schema::create('salaries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_pegawai')->constrained('informasi_pegawai')->onDelete('cascade');
             $table->integer('gaji_pokok')->default(9);
             $table->integer('tunjangan')->nullable()->default(9);
             $table->integer('potongan')->nullable()->default(9);
-            $table->date('tanggal_gaji');
-            $table->string('status');
+            $table->integer('total_gaji')->default(9);
+            $table->integer('type');
+            $table->float('rate');
+            $table->date('efective_date');
             $table->timestamps();
+            $table->softDeletes();
+            $table->string('status');
         });
     }
 
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('gaji_pegawai');
+        Schema::dropIfExists('salaries');
     }
 };

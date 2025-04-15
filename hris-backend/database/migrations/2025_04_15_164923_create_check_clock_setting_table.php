@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('catatan_pegawai', function (Blueprint $table) {
+        Schema::create('check_clock_setting', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_pegawai')->constrained('informasi_pegawai')->onDelete('cascade');
-            $table->text('catatan');
-            $table->time('tanggal_kejadian');
-            $table->time('tanggal_catatan_dibuat');
+            $table->string('name');
+            $table->integer('type');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('catatan_pegawai');
+        Schema::dropIfExists('check_clock_setting');
     }
 };
