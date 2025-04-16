@@ -13,11 +13,7 @@ return new class extends Migration
     {
         Schema::create('salaries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_pegawai')->constrained('informasi_pegawai')->onDelete('cascade');
-            $table->integer('gaji_pokok')->default(9);
-            $table->integer('tunjangan')->nullable()->default(9);
-            $table->integer('potongan')->nullable()->default(9);
-            $table->integer('total_gaji')->default(9);
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->integer('type');
             $table->float('rate');
             $table->date('efective_date');
