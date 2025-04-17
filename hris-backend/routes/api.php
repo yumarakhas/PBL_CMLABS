@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CheckClockSettingController;
 use App\Http\Controllers\CheckClockController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\LettersController;
+use App\Http\Controllers\LetterFormatsController;
+use App\Models\Letter_formats as ModelsLetter_formats;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -34,4 +37,18 @@ Route::prefix('employee')->group(function () {
     Route::post('/', [EmployeeController::class, 'store']);
     Route::put('/{id}', [EmployeeController::class, 'update']);
     Route::delete('/{id}', [EmployeeController::class, 'destroy']);
+});
+
+Route::prefix('letters')->group(function () {
+    Route::get('/', [LettersController::class, 'index']);
+    Route::post('/', [LettersController::class, 'store']);
+    Route::put('/{id}', [LettersController::class, 'update']);
+    Route::delete('/{id}', [LettersController::class, 'destroy']);
+});
+
+Route::prefix('letterFormats')->group(function () {
+    Route::get('/', [LetterFormatsController::class, 'index']);
+    Route::post('/', [LetterFormatsController::class, 'store']);
+    Route::put('/{id}', [LetterFormatsController::class, 'update']);
+    Route::delete('/{id}', [LetterFormatsController::class, 'destroy']);
 });
