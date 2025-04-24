@@ -8,7 +8,7 @@ import {
 
 export default function Sidebar() {
   return (
-    <div className="w-16 h-screen bg-white flex flex-col items-center py-4 gap-6 shadow-md">
+    <aside className="w-16 h-screen sticky top-0 bg-white flex flex-col items-center py-4 gap-6 shadow-md ">
       {/* Logo */}
       <img src="/logo.png" alt="Logo" className="w-6 h-auto" />
 
@@ -20,7 +20,7 @@ export default function Sidebar() {
         <SidebarIcon icon={<MdAssignment />} />
         <SidebarIcon icon={<MdCalendarToday />} />
       </div>
-    </div>
+    </aside>
   );
 }
 
