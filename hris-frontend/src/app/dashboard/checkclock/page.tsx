@@ -217,29 +217,176 @@ export default function CheckclockPage() {
             </div>
 
             {/* Body */}
-            <div className="px-6 py-5 space-y-4">
-              <div className="text-sm">
-                Are you sure you want to approve attendance for{" "}
-                <span className="font-semibold">{selectedRecord.name}</span>?
+            <div className="px-6 py-5 space-y-8">
+                <div className="text-sm">
+                    Are you sure you want to approve attendance for{" "}
+                    <span className="font-semibold">{selectedRecord.name}</span>?
+                </div>
+                <div className="flex justify-end gap-4">
+                    <button
+                        onClick={handleConfirmReject}
+                        className="px-6 py-2 text-white bg-red-500 rounded-md hover:bg-red-600"
+                    >
+                        Reject
+                    </button>
+                    <button
+                        onClick={handleConfirmApprove}
+                        className="px-6 py-2 text-white bg-green-500 rounded-md hover:bg-green-600"
+                    >
+                        Approve
+                    </button>
+                </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Details */}
+      {showDetailModal && selectedDetail && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-xs">
+          <div className="w-full max-w-md h-full bg-white shadow-lg overflow-y-auto p-6">
+            {/* Header */}
+            <div className="flex justify-between items-center border-b pb-4 mb-4">
+              <h2 className="text-xl font-semibold">Attendance Details</h2>
+              <button onClick={() => setShowDetailModal(false)} className="text-2xl">
+                <MdClose />
+              </button>
+            </div>
+
+            {/* Employee Info */}
+            <div className="flex items-center mb-6 border p-4 rounded-md">
+              <FaUserCircle className="text-3xl text-gray-500 mr-4" />
+              <div>
+                <h3 className="font-bold text-lg">{selectedDetail.name}</h3>
+                <p className="text-sm text-gray-600">{selectedDetail.position}</p>
               </div>
-              <div className="flex justify-between gap-4">
-                <button
-                  onClick={handleConfirmReject}
-                  className="px-6 py-2 text-white bg-red-500 rounded-md hover:bg-red-600"
-                >
-                  Reject
-                </button>
-                <button
-                  onClick={handleConfirmApprove}
-                  className="px-6 py-2 text-white bg-green-500 rounded-md hover:bg-green-600"
-                >
-                  Approve
-                </button>
+              <div className="ml-auto">
+                <span className={`text-sm px-2 py-1 rounded-full ${selectedDetail.approved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                  {selectedDetail.approved === true ? "Status Approve" : selectedDetail.approved === false ? "Status Rejected" : "Waiting Approval"}
+                </span>
+              </div>
+            </div>
+
+            {/* Attendance Info */}
+            <div className="border rounded-md p-4 mb-4">
+              <h4 className="font-semibold mb-3">Attendance Information</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Date</p>
+                  <p className="font-medium">March 01, 2025</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Check In</p>
+                  <p className="font-medium">{selectedDetail.clockIn}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Check Out</p>
+                  <p className="font-medium">{selectedDetail.clockOut}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Work Hours</p>
+                  <p className="font-medium">{selectedDetail.workHours}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-gray-500">Status</p>
+                  <p className="font-medium">{selectedDetail.status}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Location Info */}
+            <div className="border rounded-md p-4 mb-4">
+              <h4 className="font-semibold mb-3">Location Information</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Location</p>
+                  <p className="font-medium">Office</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Detail Address</p>
+                  <p className="font-medium">Jl. Veteran No.1, Kota Malang</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Lat</p>
+                  <p className="font-medium">-7983908</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Long</p>
+                  <p className="font-medium">112.621381</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Proof of Attendance */}
+            <div className="border rounded-md p-4">
+              <h4 className="font-semibold mb-3">Proof of Attendance</h4>
+              <div className="flex justify-between items-center px-4 py-2 border rounded-md">
+                <span className="text-sm">Proof of Attendance.JPEG</span>
+                <div className="flex items-center gap-3 text-xl text-gray-500">
+                  <button><i className="fas fa-eye" /></button>
+                  <button><i className="fas fa-download" /></button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between mt-4 text-sm">
+        {/* Left: Items per page */}
+        <div className="flex items-center gap-2">
+          <span>Show</span>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="border border-gray-300 rounded-md px-2 py-1"
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={30}>30</option>
+          </select>
+        </div>
+
+        {/* Middle: Showing x to y of z */}
+        <div>
+          Showing {startIndex + 1} to {endIndex} of {totalItems} records
+        </div>
+
+        {/* Right: Page Navigation */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
+          >
+            ‹
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => handlePageChange(i + 1)}
+              className={`px-3 py-1 rounded-md border ${
+                currentPage === i + 1
+                  ? "bg-gray-300"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
+          >
+            ›
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
