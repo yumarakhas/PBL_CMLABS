@@ -91,7 +91,7 @@ export default function SignUpPage() {
             <div className="flex items-start gap-2 mb-7">
               <input
                 type="checkbox"
-                className="mt-1 w-4 h-4 border-2 border-gray-300 rounded focus:outline-none"
+                className="mt-1 w-4 h-4 border-2 border-gray-300 rounded-full appearance-none checked:bg-blue-600 checked:border-blue-600 focus:outline-none"
               />
               <label className="text-sm">
                 I agree with the terms of use of HRIS

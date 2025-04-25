@@ -87,7 +87,7 @@ export default function SignInWithIDEmployee() {
                 />
                 Remember Me
               </label>
-              <Link href="#" className="text-blue-600 font-medium">
+              <Link href="/forgotPassword" className="text-blue-600 font-medium">
                 Forgot Password?
               </Link>
             </div>
