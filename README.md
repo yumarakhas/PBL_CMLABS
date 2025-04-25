@@ -55,6 +55,12 @@ Mengembangkan aplikasi berbasis website yang mampu mengelola:
 
 ---
 
+## ☁️ Cloud Architecture
+
+![Cloud Architecture](Cloud-Architecture-HRIS.jpg)
+
+---
+
 ## 📣 Note
 
 Proyek ini merupakan hasil kolaborasi antara mahasiswa Politeknik Negeri Malang dan cmlabs sebagai mitra industri dalam skema Project Based Learning (PBL).  
