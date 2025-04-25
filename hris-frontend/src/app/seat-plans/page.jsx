@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 
 const seatPlans = [
   {
@@ -40,7 +42,11 @@ const seatPlans = [
   }
 ];
 
+
 export default function SeatPlanPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  
   return (
     <div className="min-h-screen bg-[#D9D9D9] px-4 py-10 flex justify-center">
       <div className="w-full max-w-5xl">
@@ -49,11 +55,27 @@ export default function SeatPlanPage() {
           <p className="text-[#595959] mb-6 text-sm md:text-base max-w-3xl mx-auto">
             Choose the plan that best suits your business! This HRIS offers both subscription and pay-as-you-go payment options, available in the following packages:
           </p>
-          <div className="inline-flex rounded-xl overflow-hidden border border-gray-300">
-            <Link href="/packagePlans">
-              <button className="bg-[#1E3A5F] text-white px-6 py-2 font-medium text-sm md:text-base">Package</button>
-            </Link>
-            <button className="bg-[#7CA5BF] text-white px-6 py-2 font-medium text-sm md:text-base">Seat</button>
+            <div className="inline-flex rounded-xl overflow-hidden border border-gray-300 mb-10">
+            <button
+              onClick={() => router.push("/package-plans")}
+              className={`px-6 py-2 font-medium ${
+                pathname === "/package-plans"
+                  ? "bg-[#1E3A5F] text-white"
+                  : "bg-[#7CA5BF] text-white hover:bg-[#5c8aa6]"
+              }`}
+            >
+              Package
+            </button>
+            <button
+              onClick={() => router.push("/seat-plans")}
+              className={`px-6 py-2 font-medium ${
+                pathname === "/seat-plans"
+                  ? "bg-[#1E3A5F] text-white"
+                  : "bg-[#7CA5BF] text-white hover:bg-[#5c8aa6]"
+              }`}
+            >
+              Seat
+            </button>
           </div>
         </div>
 
