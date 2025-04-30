@@ -6,7 +6,7 @@ import {
   MdGroups,
   MdAccessTime,
   MdAssignment,
-  MdCalendarToday,
+  MdPerson, // Ikon untuk user
 } from 'react-icons/md';
 
 type SidebarIconProps = {
@@ -28,16 +28,29 @@ const SidebarIcon: React.FC<SidebarIconProps> = ({ icon, active = false, onClick
   </button>
 );
 
-const menuItems: { icon: ReactNode; path: string }[] = [
-  { icon: <MdOutlineSpaceDashboard />, path: '/dashboard/dashboard' },
-  { icon: <MdGroups />, path: '/dashboard/employee-database' },
-  { icon: <MdAccessTime />, path: '/dashboard/checkclock' },
-  { icon: <MdAssignment />, path: '/dashboard/letter-management' },
+const adminMenuItems: { icon: ReactNode; path: string }[] = [
+  { icon: <MdOutlineSpaceDashboard />, path: '/admin/dashboard' },
+  { icon: <MdGroups />, path: '/admin/employee-database' },
+  { icon: <MdAccessTime />, path: '/admin/checkclock' },
+  { icon: <MdAssignment />, path: '/admin/letter-management' },
+];
+
+const userMenuItems: { icon: ReactNode; path: string }[] = [
+  { icon: <MdOutlineSpaceDashboard />, path: '/user/dashboard' },
+  { icon: <MdGroups />, path: '/user/employee-database' },
+  { icon: <MdAccessTime />, path: '/user/checkclock' },
+  { icon: <MdAssignment />, path: '/user/letter-management' },
 ];
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
+
+  // Tentukan apakah user adalah admin atau user
+  const isAdmin = pathname.startsWith('/admin');
+  const isUser = pathname.startsWith('/user');
+
+  const menuItems = isAdmin ? adminMenuItems : isUser ? userMenuItems : [];
 
   return (
     <aside className="w-16 h-screen sticky top-0 bg-white flex flex-col items-center py-4 gap-6 shadow-md">
@@ -48,7 +61,7 @@ export default function Sidebar() {
       <div className="flex flex-col items-center gap-2 mt-4 w-full">
         {menuItems.map(({ icon, path }) => {
           const active =
-            pathname === path || pathname.startsWith(path + '/');
+            pathname === path || pathname.startsWith(path + '/'); // Pastikan path yang dimulai dengan path tertentu juga aktif
           return (
             <SidebarIcon
               key={path}
