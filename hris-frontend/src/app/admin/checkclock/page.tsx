@@ -112,7 +112,7 @@ export default function CheckclockPage() {
           </button>
           <button
             className="flex items-center gap-1 px-3 py-1 bg-[#BA3C54] text-white rounded-md text-sm hover:opacity-90"
-            onClick={() => router.push("/dashboard/checkclock/add-checkclock")}
+            onClick={() => router.push("/admin/checkclock/add-checkclock")}
           >
             <FaPlus /> Add Data
           </button>
@@ -198,7 +198,7 @@ export default function CheckclockPage() {
 
       {/* Modal Approve&Reject*/}
       {showModal && selectedRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4">
@@ -243,7 +243,7 @@ export default function CheckclockPage() {
 
       {/* Modal Details */}
       {showDetailModal && selectedDetail && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/30">
           <div className="w-full max-w-md h-full bg-white shadow-lg overflow-y-auto p-6">
             {/* Header */}
             <div className="flex justify-between items-center border-b pb-4 mb-4">
