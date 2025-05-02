@@ -1,4 +1,4 @@
-"use client";
+"use client"; // WAJIB kalau pakai useRouter dan usePathname
 
 import { useRouter, usePathname } from "next/navigation";
 import React from "react";
@@ -49,7 +49,7 @@ export default function TabSwtch() {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-[#D9D9D9] px-6 py-10">
+    <div className="min-h-screen bg-[#D9D9D9] px-6 py-10 font-sans">
       <div className="text-center">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-2">
           HRIS Pricing Plans
@@ -89,7 +89,7 @@ export default function TabSwtch() {
           {packagePlans.map((plan, idx) => (
             <div
               key={idx}
-              className="rounded-md p-6 shadow-md bg-[#B4D0DC] transform transition duration-300 hover:bg-[#7CA5BF] hover:scale-105 hover:shadow-lg cursor-pointer"
+              className="rounded-md p-6 shadow-md bg-[#B4D0DC] transform transition duration-300 hover:bg-[#7CA5BF] hover:scale-105 hover:shadow-lg"
             >
               <h2 className="text-2xl font-bold text-[#595959] mb-1">{plan.title}</h2>
               <p className="text-sm text-[#595959] mb-4">{plan.subtitle}</p>
@@ -103,7 +103,7 @@ export default function TabSwtch() {
               </ul>
               <button
                 onClick={() => router.push("/seat-plans")}
-                className="w-full bg-[#577A9E] text-white py-2 rounded-md font-medium hover:bg-[#1E3A5F] transition"
+                className="w-full bg-[#577A9E] text-white py-2 rounded-md font-medium hover:bg-[#1E3A5F] transition cursor-pointer"
               >
                 Select a Package →
               </button>
