@@ -1,10 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
+import { useRouter } from "next/navigation";
 
 export default function AddLetterManagementPage() {
   const { setTitle } = usePageTitle();
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert("Data submitted!");
+  };
 
   useEffect(() => {
     setTitle("Add Letter Management");
@@ -17,8 +24,7 @@ export default function AddLetterManagementPage() {
         <select
           className="w-1/4 border border-gray-300 rounded px-4 py-2"
           value={selectedOption}
-          onChange={(e) => setSelectedOption(e.target.value)}
-        >
+          onChange={(e) => setSelectedOption(e.target.value)}>
           <option value="">--None--</option>
           <option value="fill">Fill the document</option>
           <option value="upload">Upload Document</option>
@@ -54,9 +60,19 @@ export default function AddLetterManagementPage() {
               />
             </div>
 
-            <div className="flex justify-end space-x-2">
-              <button className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
-              <button className="bg-green-600 text-white px-4 py-2 rounded">Save</button>
+            {/* Tombol */}
+            <div className="col-span-2 flex justify-end space-x-3 mt-4">
+              <button
+                type="button"
+                onClick={() => router.push("/admin/letter-management")}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                Save
+              </button>
             </div>
           </div>
         )}
@@ -72,9 +88,19 @@ export default function AddLetterManagementPage() {
               />
             </div>
 
-            <div className="flex justify-end space-x-2">
-              <button className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
-              <button className="bg-green-600 text-white px-4 py-2 rounded">Upload</button>
+            {/* Tombol */}
+            <div className="col-span-2 flex justify-end space-x-3 mt-4">
+              <button
+                type="button"
+                onClick={() => router.push("/admin/letter-management")}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                Save
+              </button>
             </div>
           </div>
         )}

@@ -12,20 +12,60 @@ import {
 import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
-interface Employee {
+type AvatarProps = {
+  src?: string;
+  alt: string;
+};
+
+function EmployeeAvatar({ src, alt }: AvatarProps) {
+  const [imgError, setImgError] = useState(false);
+
+  if (!src || imgError) {
+    return (
+      <div className="w-20 h-20 rounded-full bg-gray-300 mx-auto border border-gray-300" />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setImgError(true)}
+      className="w-20 h-20 rounded-full object-cover mx-auto border border-gray-300"
+    />
+  );
+}
+
+type EmployeeType = {
   id: number;
-  name: string;
+  photo?: string;
   gender: string;
   phone: string;
   branch: string;
   position: string;
   grade: string;
   status: boolean;
-}
+  FirstName: string;
+  LastName: string;
+  MobileNumber: string;
+  NIK: string;
+  LastEducation: string;
+  PlaceOfBirth: string;
+  DateOfBirth: string;
+  ContractType: string;
+  Bank: string;
+  BankAccountNumber: string;
+  BankAccountHolderName: string;
+  SPType: string;
+};
 
 export default function EmployeeDatabasetPage() {
   const { setTitle } = usePageTitle();
   const router = useRouter();
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeType | null>(
+    null
+  );
+  const [showModal, setShowModal] = useState(false);
 
   const [summary, setSummary] = useState({
     period: "April 2025",
@@ -33,7 +73,31 @@ export default function EmployeeDatabasetPage() {
     newHires: 0,
     fullTime: 0,
   });
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeType[]>([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const totalItems = employees.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+  const currentEmployees = employees.slice(startIndex, endIndex);
+
+  const [imgError, setImgError] = useState(false);
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredEmployees = employees.filter((emp) =>
+    emp.FirstName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     setTitle("Employee Database");
@@ -48,43 +112,87 @@ export default function EmployeeDatabasetPage() {
     setEmployees([
       {
         id: 1,
-        name: "Jasmine Ayu",
         gender: "female",
         phone: "081234567890",
         branch: "Jakarta",
         position: "HR Manager",
         grade: "Senior",
         status: true,
+        FirstName: "Siti",
+        LastName: "Ayu",
+        MobileNumber: "0857483468",
+        NIK: "87548236329437",
+        LastEducation: "Kuliah",
+        PlaceOfBirth: "Malang",
+        DateOfBirth: "11-02-22004",
+        ContractType: "Permanent",
+        Bank: "BCA",
+        BankAccountNumber: "6896565865",
+        BankAccountHolderName: "Jasmine",
+        SPType: "none",
       },
       {
         id: 2,
-        name: "Budi Santoso",
         gender: "male",
         phone: "082112345678",
         branch: "Bandung",
         position: "Backend Developer",
         grade: "Mid",
         status: false,
+        FirstName: "Nur",
+        LastName: "Ayu",
+        MobileNumber: "0857483468",
+        NIK: "87548236329437",
+        LastEducation: "Kuliah",
+        PlaceOfBirth: "Malang",
+        DateOfBirth: "11-02-22004",
+        ContractType: "Permanent",
+        Bank: "BCA",
+        BankAccountNumber: "6896565865",
+        BankAccountHolderName: "Jasmine",
+        SPType: "none",
       },
       {
         id: 3,
-        name: "Siti Aminah",
         gender: "female",
         phone: "089876543210",
         branch: "Surabaya",
         position: "UI/UX Designer",
         grade: "Junior",
         status: true,
+        FirstName: "Luna",
+        LastName: "Ayu",
+        MobileNumber: "0857483468",
+        NIK: "87548236329437",
+        LastEducation: "Kuliah",
+        PlaceOfBirth: "Malang",
+        DateOfBirth: "11-02-22004",
+        ContractType: "Permanent",
+        Bank: "BCA",
+        BankAccountNumber: "6896565865",
+        BankAccountHolderName: "Jasmine",
+        SPType: "none",
       },
       {
         id: 4,
-        name: "Rizky Hidayat",
         gender: "male",
         phone: "083812345678",
         branch: "Medan",
         position: "Product Owner",
         grade: "Senior",
         status: true,
+        FirstName: "Jasmine",
+        LastName: "Ayu",
+        MobileNumber: "0857483468",
+        NIK: "87548236329437",
+        LastEducation: "Kuliah",
+        PlaceOfBirth: "Malang",
+        DateOfBirth: "11-02-22004",
+        ContractType: "Permanent",
+        Bank: "BCA",
+        BankAccountNumber: "6896565865",
+        BankAccountHolderName: "Jasmine",
+        SPType: "none",
       },
     ]);
   }, [setTitle]);
@@ -118,6 +226,8 @@ export default function EmployeeDatabasetPage() {
                 type="text"
                 placeholder="Search Employee"
                 className="outline-none text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <button className="flex items-center gap-1 px-3 py-1 border rounded-md hover:bg-[#D9D9D9] text-sm">
@@ -126,53 +236,72 @@ export default function EmployeeDatabasetPage() {
             <button className="flex items-center gap-1 px-3 py-1 border rounded-md hover:bg-[#D9D9D9] text-sm">
               <FiDownload /> Export
             </button>
-            <button className="flex items-center gap-1 px-3 py-1 bg-[#BA3C54] text-white rounded-md text-sm hover:opacity-90"
-            onClick={() => router.push("/dashboard/employee-database/add-employee-database")}
-            >
+            <button
+              className="flex items-center gap-1 px-3 py-1 bg-[#BA3C54] text-white rounded-md text-sm hover:opacity-90"
+              onClick={() =>
+                router.push("/admin/employee-database/add-employee-database")
+              }>
               <FaPlus /> Add Data
             </button>
           </div>
         </div>
 
         {/* Table */}
-        <div className="pt-6 overflow-auto bg-white rounded-lg shadow">
-          <table className="min-w-full table-auto text-sm">
-            <thead className="bg-gray-800 text-white">
+        <div className="relative pt-6 overflow-x-auto bg-white rounded-lg shadow">
+          <table className="min-w-full divide-y divide-gray-500">
+            <thead className="bg-gray-800">
               <tr>
-                <th className="px-3 py-2">No.</th>
-                <th className="px-3 py-2">Avatar</th>
-                <th className="px-3 py-2">Name</th>
-                <th className="px-3 py-2">Gender</th>
-                <th className="px-3 py-2">Phone Number</th>
-                <th className="px-3 py-2">Branch</th>
-                <th className="px-3 py-2">Position</th>
-                <th className="px-3 py-2">Grade</th>
-                <th className="px-3 py-2">Status</th>
-                <th className="px-3 py-2">Action</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  No.
+                </th>
+                <th className="px-4 py-2 text-center text-sm font-semibold text-white">
+                  Avatar
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Name
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Gender
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Phone Number
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Branch
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Position
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Grade
+                </th>
+                <th className="px-4 py-2 text-sm font-semibold text-white text-center">
+                  Status
+                </th>
+                <th className="px-4 py-2 text-sm font-semibold text-white text-center">
+                  Action
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {employees.map((employee, index) => (
-                <tr
-                  key={employee.id}
-                  className="text-center border-t hover:bg-gray-50">
-                  <td className="px-3 py-2">{index + 1}</td>
-                  <td className="px-3 py-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-300 mx-auto" />
+            <tbody className="divide-y divide-gray-200">
+              {filteredEmployees.map((employee, index) => (
+                <tr key={employee.id}>
+                  <td className="px-4 py-2">{index + 1}</td>
+                  <td className="px-4 py-2">
+                    <EmployeeAvatar
+                      src={employee.photo}
+                      alt={employee.FirstName}
+                    />
                   </td>
-                  <td className="px-3 py-2">{employee.name}</td>
-                  <td className="px-3 py-2">
-                    <span className="px-2 py-1 bg-gray-200 rounded text-xs">
-                      {employee.gender}
-                    </span>
+                  <td className="px-4 py-2">
+                    {employee.FirstName} {employee.LastName}
                   </td>
-                  <td className="px-3 py-2">{employee.phone}</td>
-                  <td className="px-3 py-2 text-blue-500 underline">
-                    {employee.branch}
-                  </td>
-                  <td className="px-3 py-2">{employee.position}</td>
-                  <td className="px-3 py-2">{employee.grade}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-2">{employee.gender}</td>
+                  <td className="px-4 py-2">{employee.phone}</td>
+                  <td className="px-4 py-2">{employee.branch}</td>
+                  <td className="px-4 py-2">{employee.position}</td>
+                  <td className="px-4 py-2">{employee.grade}</td>
+                  <td className="px-4 py-2 text-center">
                     <input
                       type="checkbox"
                       className="toggle toggle-sm"
@@ -180,15 +309,20 @@ export default function EmployeeDatabasetPage() {
                       readOnly
                     />
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-2 text-center">
                     <div className="flex h-full items-center justify-center gap-2">
-                      <button className="text-blue-500 hover:text-blue-700">
+                      <button className="text-blue-500 hover:text-blue-700 text-xl">
                         <FiEdit />
                       </button>
-                      <button className="text-red-500 hover:text-red-700">
+                      <button className="text-red-500 hover:text-red-700 text-xl">
                         <FiTrash2 />
                       </button>
-                      <button className="text-gray-500 hover:text-gray-700">
+                      <button
+                        className="text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={() => {
+                          setSelectedEmployee(employee);
+                          setShowModal(true);
+                        }}>
                         <FiEye />
                       </button>
                     </div>
@@ -199,36 +333,141 @@ export default function EmployeeDatabasetPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-4">
-          <div>
-            <label>
-              Showing{" "}
-              <select className="border rounded px-2 py-1 text-sm">
-                <option>10</option>
-                <option>25</option>
-                <option>50</option>
-              </select>
-            </label>
-          </div>
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between mt-4 text-sm">
+          {/* Left: Items per page */}
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white text-[#1C3D5A] border-[#1C3D5A]">
-              &lt;
+            <span>Show</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-md px-2 py-1">
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+            </select>
+          </div>
+
+          {/* Middle: Showing x to y of z */}
+          <div>
+            Showing {startIndex + 1} to {endIndex} of {totalItems} records
+          </div>
+
+          {/* Right: Page Navigation */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50">
+              ‹
             </button>
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white">
-              1
-            </button>
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white">
-              2
-            </button>
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white">
-              3
-            </button>
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white text-[#1C3D5A] border-[#1C3D5A]">
-              &gt;
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-3 py-1 rounded-md border ${
+                  currentPage === i + 1
+                    ? "bg-gray-300"
+                    : "bg-white hover:bg-gray-100"
+                }`}>
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50">
+              ›
             </button>
           </div>
         </div>
+
+        {showModal && selectedEmployee && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-xl border border-gray-200">
+              <h2 className="text-lg font-bold mb-4 text-center">
+                Employee Details
+              </h2>
+
+              {/* Foto di Tengah */}
+              <div className="flex justify-center mb-6">
+                <EmployeeAvatar
+                  src={selectedEmployee.photo}
+                  alt={selectedEmployee.FirstName}
+                />
+              </div>
+
+              {/* Data */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                <p>
+                  <strong>First Name:</strong> {selectedEmployee.FirstName}
+                </p>
+                <p>
+                  <strong>Last Name:</strong> {selectedEmployee.LastName}
+                </p>
+                <p>
+                  <strong>Mobile Number:</strong>{" "}
+                  {selectedEmployee.MobileNumber}
+                </p>
+                <p>
+                  <strong>NIK:</strong> {selectedEmployee.NIK}
+                </p>
+                <p>
+                  <strong>Gender:</strong> {selectedEmployee.gender}
+                </p>
+                <p>
+                  <strong>Last Education:</strong>{" "}
+                  {selectedEmployee.LastEducation}
+                </p>
+                <p>
+                  <strong>Place Of Birth:</strong>{" "}
+                  {selectedEmployee.PlaceOfBirth}
+                </p>
+                <p>
+                  <strong>Date Of Birth:</strong> {selectedEmployee.DateOfBirth}
+                </p>
+                <p>
+                  <strong>Branch:</strong> {selectedEmployee.branch}
+                </p>
+                <p>
+                  <strong>Position:</strong> {selectedEmployee.position}
+                </p>
+                <p>
+                  <strong>Contract Type:</strong>{" "}
+                  {selectedEmployee.ContractType}
+                </p>
+                <p>
+                  <strong>Grade:</strong> {selectedEmployee.grade}
+                </p>
+                <p>
+                  <strong>Bank:</strong> {selectedEmployee.Bank}
+                </p>
+                <p>
+                  <strong>Bank Account Number:</strong>{" "}
+                  {selectedEmployee.BankAccountNumber}
+                </p>
+                <p>
+                  <strong>Account Holder Name:</strong>{" "}
+                  {selectedEmployee.BankAccountHolderName}
+                </p>
+                <p>
+                  <strong>SP Type:</strong> {selectedEmployee.SPType}
+                </p>
+              </div>
+
+              <div className="mt-6 text-right">
+                <button
+                  className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700"
+                  onClick={() => setShowModal(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
