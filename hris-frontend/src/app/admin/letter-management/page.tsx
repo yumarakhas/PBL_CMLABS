@@ -25,7 +25,22 @@ export default function LetterManagementPage() {
   const router = useRouter();
 
   const [letters, setLetters] = useState<Letter[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const totalItems = letters.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+  const currentEmployees = letters.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
   useEffect(() => {
     setTitle("Letter Management");
 
@@ -35,22 +50,19 @@ export default function LetterManagementPage() {
         id: 1,
         title: "Budi Santoso",
         type: "employment contract",
-        content:
-          "Surat Resmi Dari Kementerian Lingkungan",
+        content: "Surat Resmi Dari Kementerian Lingkungan",
       },
       {
         id: 2,
         title: "Andi Baskara",
         type: "employment contract",
-        content:
-          "Penghargaan Bakti Angkasa",
+        content: "Penghargaan Bakti Angkasa",
       },
       {
         id: 3,
         title: "Suyono",
         type: "employment contract",
-        content:
-          "Sertifikasi Google Loooker Studio",
+        content: "Sertifikasi Google Loooker Studio",
       },
     ]);
 
@@ -91,8 +103,9 @@ export default function LetterManagementPage() {
             </button>
             <button
               className="flex items-center gap-1 px-3 py-1 bg-[#BA3C54] text-white rounded-md text-sm hover:opacity-90"
-              onClick={() => router.push("/dashboard/letter-management/add-letter")}
-            >
+              onClick={() =>
+                router.push("/admin/letter-management/add-letter")
+              }>
               <FaPlus /> Add Data
             </button>
           </div>
@@ -114,8 +127,7 @@ export default function LetterManagementPage() {
               {letters.map((letter, index) => (
                 <tr
                   key={letter.id}
-                  className="text-center border-t hover:bg-gray-50"
-                >
+                  className="text-center border-t hover:bg-gray-50">
                   <td className="px-3 py-2">{index + 1}</td>
                   <td className="px-3 py-2">{letter.title}</td>
                   <td className="px-3 py-2">{letter.type}</td>
@@ -139,22 +151,55 @@ export default function LetterManagementPage() {
           </table>
         </div>
 
-        {/* Pagination Dummy */}
-        <div className="flex justify-between items-center mt-4">
-          <div>
-            <label>
-              Showing{" "}
-              <select className="border rounded px-2 py-1 text-sm">
-                <option>10</option>
-                <option>25</option>
-              </select>
-            </label>
-          </div>
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between mt-4 text-sm">
+          {/* Left: Items per page */}
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white text-[#1C3D5A] border-[#1C3D5A]">&lt;</button>
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white">1</button>
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white">2</button>
-            <button className="px-3 py-1 hover:bg-[#1C3D5A] hover:text-white text-[#1C3D5A] border-[#1C3D5A]">&gt;</button>
+            <span>Show</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-md px-2 py-1">
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+            </select>
+          </div>
+
+          {/* Middle: Showing x to y of z */}
+          <div>
+            Showing {startIndex + 1} to {endIndex} of {totalItems} records
+          </div>
+
+          {/* Right: Page Navigation */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50">
+              ‹
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-3 py-1 rounded-md border ${
+                  currentPage === i + 1
+                    ? "bg-gray-300"
+                    : "bg-white hover:bg-gray-100"
+                }`}>
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50">
+              ›
+            </button>
           </div>
         </div>
       </div>
