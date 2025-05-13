@@ -5,18 +5,18 @@ export default function SignUpPage() {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Kiri - Gambar */}
-      <div className="w-full lg:w-1/2 bg-[#f5f9ff] flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 bg-[#f0f4ff] flex items-center justify-center p-8">
         <Image
           src="/assets/img/signup.png"
           alt="Signup Illustration"
-          width={600}
-          height={600}
+          width={700}
+          height={700}
           className="object-contain max-w-full h-auto"
         />
       </div>
 
       {/* Kanan - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-20 py-10">
+      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-[#ffffff] px-6 sm:px-12 md:px-16 lg:px-20 py-10">
         {/* Konten Atas */}
         <div>
           <div className="flex justify-between items-center mb-8">
@@ -26,7 +26,10 @@ export default function SignUpPage() {
               width={90}
               height={90}
             />
-            <Link href="/signin" className="text-blue-600 font-semibold text-sm">
+            <Link
+              href="/signin"
+              className="text-blue-600 font-semibold text-sm underline"
+            >
               Sign In here!
             </Link>
           </div>
@@ -87,14 +90,26 @@ export default function SignUpPage() {
               />
             </div>
 
-            {/* Checkbox */}
-            <div className="flex items-start gap-2 mb-7">
-              <input
-                type="checkbox"
-                className="mt-1 w-4 h-4 border-2 border-gray-300 rounded-full appearance-none checked:bg-blue-600 checked:border-blue-600 focus:outline-none"
-              />
-              <label className="text-sm">
-                I agree with the terms of use of HRIS
+            {/* Checkbox Bulat */}
+            <div className="flex items-center gap-3 mb-7">
+              <label htmlFor="terms" className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  className="peer hidden"
+                />
+                <div className="w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all duration-200">
+                  <svg
+                    className="w-3 h-3 text-white hidden peer-checked:block"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="ml-3 text-sm">I agree with the terms of use of HRIS</span>
               </label>
             </div>
 
@@ -120,7 +135,7 @@ export default function SignUpPage() {
         <div className="pt-6">
           <hr className="my-9" />
           <p className="text-center text-sm">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link href="/signin" className="text-blue-600 font-medium">
               Sign in here
             </Link>
