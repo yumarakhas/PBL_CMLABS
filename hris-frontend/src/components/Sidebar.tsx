@@ -29,7 +29,9 @@ const SidebarIcon: React.FC<SidebarIconProps> = ({ icon, active = false, onClick
 );
 
 const menuItems: { icon: ReactNode; path: string }[] = [
-  { icon: <MdOutlineSpaceDashboard />, path: '/dashboard/dashboard' },
+  // { icon: <MdOutlineSpaceDashboard />, path: '/dashboard/dashboard' },
+  { icon: <MdOutlineSpaceDashboard />, path: '/dashboard/admin' },
+  { icon: <MdOutlineSpaceDashboard />, path: '/dashboard/user' },
   { icon: <MdGroups />, path: '/dashboard/employee-database' },
   { icon: <MdAccessTime />, path: '/dashboard/checkclock' },
   { icon: <MdAssignment />, path: '/dashboard/letter-management' },
