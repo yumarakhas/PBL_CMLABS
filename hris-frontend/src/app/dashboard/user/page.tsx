@@ -81,7 +81,7 @@ export default function UserDashboard() {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-3 py-1 border rounded bg-red-600 text-white"
+              className="px-3 py-1 border rounded bg-[#BA3C54] text-white"
             >
               <option value="March">March</option>
               <option value="April">April</option>
@@ -121,7 +121,7 @@ export default function UserDashboard() {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-3 py-1 border rounded bg-red-600 text-white"
+              className="px-3 py-1 border rounded bg-[#BA3C54] text-white"
             >
               <option value="March">March</option>
               <option value="April">April</option>
@@ -170,7 +170,7 @@ export default function UserDashboard() {
           <h2 className="font-bold text-md">Your Work Hours</h2>
           <button
             onClick={handleViewChange}
-            className="px-3 py-1 bg-red-600 rounded text-white"
+            className="px-3 py-1 bg-[#BA3C54] rounded text-white"
           >
             View by {viewMode === 'Week' ? 'Month' : 'Week'}
           </button>

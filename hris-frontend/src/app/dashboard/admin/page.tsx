@@ -174,7 +174,7 @@ function Dropdown({ selected, setSelected }: { selected: string, setSelected: (v
     <select
       value={selected}
       onChange={(e) => setSelected(e.target.value)}
-      className="text-sm bg-rose-600 text-white rounded px-2 py-1"
+      className="text-sm bg-[#BA3C54] text-white rounded px-2 py-1"
     >
       {monthOptions.map((month) => (
         <option key={month} value={month}>{month}</option>
