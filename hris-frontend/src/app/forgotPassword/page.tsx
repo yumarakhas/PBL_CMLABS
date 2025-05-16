@@ -5,7 +5,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Kiri - Form Reset Password */}
-      <div className="w-full lg:w-1/2 bg-[#f5f9ff] flex flex-col px-6 sm:px-12 md:px-16 lg:px-20 py-10">
+      <div className="w-full lg:w-1/2 bg-[#f0f4ff] flex flex-col px-6 sm:px-12 md:px-16 lg:px-20 py-10">
         {/* Logo */}
         <div className="mb-12">
           <Image
@@ -17,10 +17,10 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Tengah - Form & Teks */}
-        <div className="flex-grow flex flex-col justify-center items-center text-center">
+        <div className="flex-grow flex flex-col justify-start items-center text-center pt-25">
           <div className="w-full max-w-md">
             <h1 className="text-5xl font-bold mb-10">Forgot Password</h1>
-            <p className="text-gray-600 mb-25">
+            <p className="text-gray-600 mb-15">
               No worries! Enter your email address below, and we'll send you a link to reset your password.
             </p>
 
@@ -43,8 +43,8 @@ export default function ForgotPasswordPage() {
             </form>
 
             <div className="mt-6 text-sm">
-              <Link href="/signin" className="text-blue-600 hover:underline">
-                ← Back to log in
+              <Link href="/signin" className="text-sm text-gray-800 hover:underline inlin font-bold">
+                ← Back to Sign in
               </Link>
             </div>
           </div>
@@ -56,8 +56,8 @@ export default function ForgotPasswordPage() {
         <Image
           src="/assets/img/forgotpassword.png"
           alt="Forgot Password Illustration"
-          width={500}
-          height={500}
+          width={700}
+          height={700}
           className="object-contain"
         />
       </div>
