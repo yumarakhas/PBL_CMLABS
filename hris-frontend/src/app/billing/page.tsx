@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function CheckoutPage() {
+export default function Billing() {
   const searchParams = useSearchParams();
   const router = useRouter(); // Tambahkan useRouter
   const plan = searchParams.get("plan");
