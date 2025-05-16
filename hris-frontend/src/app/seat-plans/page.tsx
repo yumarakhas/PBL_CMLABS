@@ -86,7 +86,7 @@ export default function SeatPlanPage() {
           {seatPlans.map((plan, index) => (
             <div
               key={index}
-              className="rounded-md p-6 shadow-md bg-[#B4D0DC] transform transition duration-300 hover:bg-[#7CA5BF] hover:scale-105 hover:shadow-lg cursor-pointer"
+              className="rounded-md p-6 shadow-md bg-[#B4D0DC] transform transition duration-300 hover:bg-[#7CA5BF] hover:scale-105 hover:shadow-lg"
             >
               <div>
                 <h2 className="text-lg font-bold text-[#595959] mb-2">
@@ -100,8 +100,8 @@ export default function SeatPlanPage() {
                 </p>
                 <p className="text-[#595959] text-sm mt-2">{plan.description}</p>
               </div>
-              <button onClick={() => router.push(`/checkout?plan=${encodeURIComponent(plan.title)}&price=${encodeURIComponent(plan.price.replace(/[^\d]/g, ""))}`)}
-                className="mt-6 w-full bg-[#577A9E] text-white py-2 rounded-md font-medium hover:bg-[#1E3A5F] transition">
+              <button onClick={() => router.push(`/billing?plan=${encodeURIComponent(plan.title)}&price=${encodeURIComponent(plan.price.replace(/[^\d]/g, ""))}`)}
+                className="mt-6 w-full bg-[#577A9E] text-white py-2 rounded-md font-medium hover:bg-[#1E3A5F] transition cursor-pointer">
                 Upgrade Package →
               </button>
 
