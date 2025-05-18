@@ -13,7 +13,7 @@ import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 // import api from "@/lib/api"; implementasi backend nanti
 
-interface Letter {
+interface LetterType {
   id: number;
   title: string;
   type: string;
@@ -34,7 +34,7 @@ export default function LetterManagementPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-  const currentEmployees = letters.slice(startIndex, endIndex);
+  const currentLetters = letters.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -80,6 +80,14 @@ export default function LetterManagementPage() {
   //   }
   // };
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredLetters = letters.filter((emp) =>
+    emp.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const [selectedLetter, setSelectedLetter] = useState<LetterType | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow">
@@ -87,12 +95,15 @@ export default function LetterManagementPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">List Of Letter</h2>
           <div className="flex gap-4">
+            {/* Search */}
             <div className="flex items-center border rounded-lg px-2 py-1 bg-white">
               <FiSearch className="text-gray-500 mr-2" />
               <input
                 type="text"
-                placeholder="Search Employee"
+                placeholder="Search Letters"
                 className="outline-none text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <button className="flex items-center gap-1 px-3 py-1 border rounded-md hover:bg-[#D9D9D9] text-sm">
@@ -112,35 +123,50 @@ export default function LetterManagementPage() {
         </div>
 
         {/* Table */}
-        <div className="pt-6 overflow-auto">
-          <table className="min-w-full table-auto text-sm">
-            <thead className="bg-gray-800 text-white">
+        <div className="relative pt-6 overflow-x-auto bg-white rounded-lg shadow">
+          <table className="min-w-full divide-y divide-gray-500">
+            <thead className="bg-gray-800">
               <tr>
-                <th className="px-3 py-2">No.</th>
-                <th className="px-3 py-2">Title</th>
-                <th className="px-3 py-2">Type Of Letter</th>
-                <th className="px-3 py-2">Content</th>
-                <th className="px-3 py-2">Action</th>
+                <th className="px-4 py-2 text-center text-sm font-semibold text-white">
+                  No.
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Title
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-white">
+                  Type Of Letter
+                </th>
+                <th className="px-4 py-2 text-center text-sm font-semibold text-white">
+                  Content
+                </th>
+                <th className="px-4 py-2 text-center text-sm font-semibold text-white">
+                  Action
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {letters.map((letter, index) => (
+            <tbody className="divide-y divide-gray-200">
+              {filteredLetters.map((letter, index) => (
                 <tr
                   key={letter.id}
                   className="text-center border-t hover:bg-gray-50">
-                  <td className="px-3 py-2">{index + 1}</td>
-                  <td className="px-3 py-2">{letter.title}</td>
-                  <td className="px-3 py-2">{letter.type}</td>
-                  <td className="px-3 py-2">{letter.content}</td>
-                  <td className="px-3 py-2">
-                    <div className="flex justify-center gap-2">
-                      <button className="text-blue-500 hover:text-blue-700">
+                  <td className="px-4 py-2 text-center">{index + 1}</td>
+                  <td className="px-4 py-2 text-left">{letter.title}</td>
+                  <td className="px-4 py-2 text-left">{letter.type}</td>
+                  <td className="px-4 py-2 text-center">{letter.content}</td>
+                  <td className="px-4 py-2 text-center">
+                    <div className="flex h-full items-center justify-center gap-2">
+                      <button className="text-blue-500 hover:text-blue-700 text-xl">
                         <FiEdit />
                       </button>
-                      <button className="text-red-500 hover:text-red-700">
+                      <button className="text-red-500 hover:text-red-700 text-xl">
                         <FiTrash2 />
                       </button>
-                      <button className="text-gray-500 hover:text-gray-700">
+                      <button
+                        className="text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={() => {
+                          setSelectedLetter(letter);
+                          setShowModal(true);
+                        }}>
                         <FiEye />
                       </button>
                     </div>

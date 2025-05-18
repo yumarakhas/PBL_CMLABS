@@ -24,23 +24,29 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'ck_setting_id' => 'required|exists:check_clock_setting,id' ,
-            'first_name'=> 'required|string',
-            'last_name' => 'required|string',
-            'gender' => 'required|in:man,female',
-            'addres'=> 'required|string',
+            'ck_setting_id' => 'required|exists:check_clock_setting,id',
+            'FirstName' => 'required|string',
+            'LastName' => 'required|string',
+            'Gender' => 'required|boolean|max:1',
+            'Address' => 'required|string',
+            'PhoneNumber' => 'required|string',
+            'Branch' => 'required|string',
+            'Position' => 'required|string',
+            'Dvision' => 'required|string',
+            'Status' => 'required|boolean',
+            'NIK' => 'required|string',
+            'LastEducation' => 'required|string',
+            'PlaceOfBirth' => 'required|string',
+            'DateOfBirth' => 'required|string',
+            'ContractType' => 'required|string',
+            'Bank' => 'required|string',
+            'BankAccountNumber' => 'required|string',
+            'BankAccountHolderName' => 'required|string',
+            'photo' => 'nullable|string',
         ]);
 
         $employee = Employee::create($validated);
-        return response()->json($employee,201);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        return Employee::findOrFail($id);
+        return response()->json($employee, 201);
     }
 
     /**
@@ -50,7 +56,7 @@ class EmployeeController extends Controller
     {
         $employee = Employee::findOrFail($id);
         $employee->update($request->all());
-        return response()->json($employee, 200);
+        return response()->json($employee);
     }
 
     /**

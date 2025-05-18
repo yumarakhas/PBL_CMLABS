@@ -11,6 +11,8 @@ import {
 } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { getEmployees } from "@/lib/services/employee";
+import { deleteEmployee } from "@/lib/services/employee";
 
 type AvatarProps = {
   src?: string;
@@ -39,24 +41,23 @@ function EmployeeAvatar({ src, alt }: AvatarProps) {
 type EmployeeType = {
   id: number;
   photo?: string;
-  gender: string;
-  phone: string;
-  branch: string;
-  position: string;
-  grade: string;
-  status: boolean;
+  Gender: "Male" | "Female";
+  PhoneNumber: string;
+  Branch: string;
+  Position: string;
+  Division: string;
+  Status: "Aktif" | "Non Aktif";
   FirstName: string;
   LastName: string;
-  MobileNumber: string;
   NIK: string;
   LastEducation: string;
   PlaceOfBirth: string;
-  DateOfBirth: string;
+  BirthDate: string;
   ContractType: string;
   Bank: string;
   BankAccountNumber: string;
   BankAccountHolderName: string;
-  SPType: string;
+  Address: string;
 };
 
 export default function EmployeeDatabasetPage() {
@@ -68,7 +69,7 @@ export default function EmployeeDatabasetPage() {
   const [showModal, setShowModal] = useState(false);
 
   const [summary, setSummary] = useState({
-    period: "April 2025",
+    period: "",
     totalEmployees: 0,
     newHires: 0,
     fullTime: 0,
@@ -86,6 +87,17 @@ export default function EmployeeDatabasetPage() {
 
   const currentEmployees = employees.slice(startIndex, endIndex);
 
+  const handleDelete = async (id: number) => {
+    const confirmDelete = confirm("are you sure to delete this employee?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteEmployee(id); // dari service
+      fetchEmployees(); // refresh list
+    } catch (error) {
+      console.error("Gagal menghapus employee:", error);
+    }
+  };
   const [imgError, setImgError] = useState(false);
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -99,102 +111,22 @@ export default function EmployeeDatabasetPage() {
     emp.FirstName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const fetchEmployees = async () => {
+    try {
+      const res = await getEmployees();
+      setEmployees(res.data);
+      setSummary((prev) => ({
+        ...prev,
+        totalEmployees: res.data.length,
+      }));
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+
   useEffect(() => {
     setTitle("Employee Database");
-
-    setSummary({
-      period: "April 2025",
-      totalEmployees: 127,
-      newHires: 9,
-      fullTime: 104,
-    });
-
-    setEmployees([
-      {
-        id: 1,
-        gender: "female",
-        phone: "081234567890",
-        branch: "Jakarta",
-        position: "HR Manager",
-        grade: "Senior",
-        status: true,
-        FirstName: "Siti",
-        LastName: "Ayu",
-        MobileNumber: "0857483468",
-        NIK: "87548236329437",
-        LastEducation: "Kuliah",
-        PlaceOfBirth: "Malang",
-        DateOfBirth: "11-02-22004",
-        ContractType: "Permanent",
-        Bank: "BCA",
-        BankAccountNumber: "6896565865",
-        BankAccountHolderName: "Jasmine",
-        SPType: "none",
-      },
-      {
-        id: 2,
-        gender: "male",
-        phone: "082112345678",
-        branch: "Bandung",
-        position: "Backend Developer",
-        grade: "Mid",
-        status: false,
-        FirstName: "Nur",
-        LastName: "Ayu",
-        MobileNumber: "0857483468",
-        NIK: "87548236329437",
-        LastEducation: "Kuliah",
-        PlaceOfBirth: "Malang",
-        DateOfBirth: "11-02-22004",
-        ContractType: "Permanent",
-        Bank: "BCA",
-        BankAccountNumber: "6896565865",
-        BankAccountHolderName: "Jasmine",
-        SPType: "none",
-      },
-      {
-        id: 3,
-        gender: "female",
-        phone: "089876543210",
-        branch: "Surabaya",
-        position: "UI/UX Designer",
-        grade: "Junior",
-        status: true,
-        FirstName: "Luna",
-        LastName: "Ayu",
-        MobileNumber: "0857483468",
-        NIK: "87548236329437",
-        LastEducation: "Kuliah",
-        PlaceOfBirth: "Malang",
-        DateOfBirth: "11-02-22004",
-        ContractType: "Permanent",
-        Bank: "BCA",
-        BankAccountNumber: "6896565865",
-        BankAccountHolderName: "Jasmine",
-        SPType: "none",
-      },
-      {
-        id: 4,
-        gender: "male",
-        phone: "083812345678",
-        branch: "Medan",
-        position: "Product Owner",
-        grade: "Senior",
-        status: true,
-        FirstName: "Jasmine",
-        LastName: "Ayu",
-        MobileNumber: "0857483468",
-        NIK: "87548236329437",
-        LastEducation: "Kuliah",
-        PlaceOfBirth: "Malang",
-        DateOfBirth: "11-02-22004",
-        ContractType: "Permanent",
-        Bank: "BCA",
-        BankAccountNumber: "6896565865",
-        BankAccountHolderName: "Jasmine",
-        SPType: "none",
-      },
-    ]);
+    fetchEmployees();
   }, [setTitle]);
 
   return (
@@ -273,7 +205,7 @@ export default function EmployeeDatabasetPage() {
                   Position
                 </th>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                  Grade
+                  Division
                 </th>
                 <th className="px-4 py-2 text-sm font-semibold text-white text-center">
                   Status
@@ -296,22 +228,18 @@ export default function EmployeeDatabasetPage() {
                   <td className="px-4 py-2">
                     {employee.FirstName} {employee.LastName}
                   </td>
-                  <td className="px-4 py-2">{employee.gender}</td>
-                  <td className="px-4 py-2">{employee.phone}</td>
-                  <td className="px-4 py-2">{employee.branch}</td>
-                  <td className="px-4 py-2">{employee.position}</td>
-                  <td className="px-4 py-2">{employee.grade}</td>
-                  <td className="px-4 py-2 text-center">
-                    <input
-                      type="checkbox"
-                      className="toggle toggle-sm"
-                      checked={employee.status}
-                      readOnly
-                    />
-                  </td>
+                  <td className="px-4 py-2">{employee.Gender}</td>
+                  <td className="px-4 py-2">{employee.PhoneNumber}</td>
+                  <td className="px-4 py-2">{employee.Branch}</td>
+                  <td className="px-4 py-2">{employee.Position}</td>
+                  <td className="px-4 py-2">{employee.Division}</td>
+                  <td className="px-4 py-2 text-center">{employee.Status}</td>
                   <td className="px-4 py-2 text-center">
                     <div className="flex h-full items-center justify-center gap-2">
-                      <button className="text-blue-500 hover:text-blue-700 text-xl">
+                      <button
+                        onClick={() => handleDelete(employee.id)}
+                        className="text-blue-500 hover:text-blue-700 text-xl
+                      ">
                         <FiEdit />
                       </button>
                       <button className="text-red-500 hover:text-red-700 text-xl">
@@ -386,84 +314,85 @@ export default function EmployeeDatabasetPage() {
         </div>
 
         {showModal && selectedEmployee && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-xl border border-gray-200">
-              <h2 className="text-lg font-bold mb-4 text-center">
-                Employee Details
-              </h2>
+          // backdrop
+          <div className="fixed inset-0 bg-black bg-opacity-40 z-40">
+            {/* modal */}
+            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+              <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-xl border border-gray-200">
+                <h2 className="text-lg font-bold mb-4 text-center">
+                  Employee Details
+                </h2>
 
-              {/* Foto di Tengah */}
-              <div className="flex justify-center mb-6">
-                <EmployeeAvatar
-                  src={selectedEmployee.photo}
-                  alt={selectedEmployee.FirstName}
-                />
-              </div>
+                {/* Foto di Tengah */}
+                <div className="flex justify-center mb-6">
+                  <EmployeeAvatar
+                    src={selectedEmployee.photo}
+                    alt={selectedEmployee.FirstName}
+                  />
+                </div>
 
-              {/* Data */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                <p>
-                  <strong>First Name:</strong> {selectedEmployee.FirstName}
-                </p>
-                <p>
-                  <strong>Last Name:</strong> {selectedEmployee.LastName}
-                </p>
-                <p>
-                  <strong>Mobile Number:</strong>{" "}
-                  {selectedEmployee.MobileNumber}
-                </p>
-                <p>
-                  <strong>NIK:</strong> {selectedEmployee.NIK}
-                </p>
-                <p>
-                  <strong>Gender:</strong> {selectedEmployee.gender}
-                </p>
-                <p>
-                  <strong>Last Education:</strong>{" "}
-                  {selectedEmployee.LastEducation}
-                </p>
-                <p>
-                  <strong>Place Of Birth:</strong>{" "}
-                  {selectedEmployee.PlaceOfBirth}
-                </p>
-                <p>
-                  <strong>Date Of Birth:</strong> {selectedEmployee.DateOfBirth}
-                </p>
-                <p>
-                  <strong>Branch:</strong> {selectedEmployee.branch}
-                </p>
-                <p>
-                  <strong>Position:</strong> {selectedEmployee.position}
-                </p>
-                <p>
-                  <strong>Contract Type:</strong>{" "}
-                  {selectedEmployee.ContractType}
-                </p>
-                <p>
-                  <strong>Grade:</strong> {selectedEmployee.grade}
-                </p>
-                <p>
-                  <strong>Bank:</strong> {selectedEmployee.Bank}
-                </p>
-                <p>
-                  <strong>Bank Account Number:</strong>{" "}
-                  {selectedEmployee.BankAccountNumber}
-                </p>
-                <p>
-                  <strong>Account Holder Name:</strong>{" "}
-                  {selectedEmployee.BankAccountHolderName}
-                </p>
-                <p>
-                  <strong>SP Type:</strong> {selectedEmployee.SPType}
-                </p>
-              </div>
+                {/* Data */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                  <p>
+                    <strong>First Name:</strong> {selectedEmployee.FirstName}
+                  </p>
+                  <p>
+                    <strong>Last Name:</strong> {selectedEmployee.LastName}
+                  </p>
+                  <p>
+                    <strong>NIK:</strong> {selectedEmployee.NIK}
+                  </p>
+                  <p>
+                    <strong>Gender:</strong> {selectedEmployee.Gender}
+                  </p>
+                  <p>
+                    <strong>Last Education:</strong>{" "}
+                    {selectedEmployee.LastEducation}
+                  </p>
+                  <p>
+                    <strong>Place Of Birth:</strong>{" "}
+                    {selectedEmployee.PlaceOfBirth}
+                  </p>
+                  <p>
+                    <strong>Date Of Birth:</strong>{" "}
+                    {selectedEmployee.BirthDate}
+                  </p>
+                  <p>
+                    <strong>Branch:</strong> {selectedEmployee.Branch}
+                  </p>
+                  <p>
+                    <strong>Position:</strong> {selectedEmployee.Position}
+                  </p>
+                  <p>
+                    <strong>Contract Type:</strong>{" "}
+                    {selectedEmployee.ContractType}
+                  </p>
+                  <p>
+                    <strong>Division:</strong> {selectedEmployee.Division}
+                  </p>
+                  <p>
+                    <strong>Bank:</strong> {selectedEmployee.Bank}
+                  </p>
+                  <p>
+                    <strong>Bank Account Number:</strong>{" "}
+                    {selectedEmployee.BankAccountNumber}
+                  </p>
+                  <p>
+                    <strong>Account Holder Name:</strong>{" "}
+                    {selectedEmployee.BankAccountHolderName}
+                  </p>
+                  <p>
+                    <strong>Address:</strong> {selectedEmployee.Address}
+                  </p>
+                </div>
 
-              <div className="mt-6 text-right">
-                <button
-                  className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700"
-                  onClick={() => setShowModal(false)}>
-                  Close
-                </button>
+                <div className="mt-6 text-right">
+                  <button
+                    className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700"
+                    onClick={() => setShowModal(false)}>
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           </div>

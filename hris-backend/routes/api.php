@@ -52,3 +52,7 @@ Route::prefix('letterFormats')->group(function () {
     Route::put('/{id}', [LetterFormatsController::class, 'update']);
     Route::delete('/{id}', [LetterFormatsController::class, 'destroy']);
 });
+
+Route::get('/test', function () {
+    return response()->json(['message' => 'API works!']);
+});
