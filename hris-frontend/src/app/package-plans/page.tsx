@@ -1,4 +1,4 @@
-"use client"; // WAJIB kalau pakai useRouter dan usePathname
+"use client";
 
 import { useRouter, usePathname } from "next/navigation";
 import React from "react";
@@ -89,10 +89,10 @@ export default function TabSwtch() {
           {packagePlans.map((plan, idx) => (
             <div
               key={idx}
-              className="rounded-md p-6 shadow-md bg-[#B4D0DC] transform transition duration-300 hover:bg-[#7CA5BF] hover:scale-105 hover:shadow-lg"
+              className="rounded-md p-6 shadow-md bg-blue-200 transform transition duration-300 hover:bg-[#7CA5BF] hover:scale-105 hover:shadow-lg"
             >
-              <h2 className="text-2xl font-bold text-[#595959] mb-1">{plan.title}</h2>
-              <p className="text-sm text-[#595959] mb-4">{plan.subtitle}</p>
+              <h2 className="text-2xl font-bold text-gray-700 mb-1">{plan.title}</h2>
+              <p className="text-sm text-gray-500 mb-4">{plan.subtitle}</p>
               <ul className="text-[#595959] text-sm mb-6 space-y-2">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start">

@@ -6,66 +6,67 @@ import {
   MdGroups,
   MdAccessTime,
   MdAssignment,
-  MdPerson, // Ikon untuk user
 } from 'react-icons/md';
 
 type SidebarIconProps = {
   icon: ReactNode;
+  label: string;
   active?: boolean;
   onClick: () => void;
 };
 
-const SidebarIcon: React.FC<SidebarIconProps> = ({ icon, active = false, onClick }) => (
+const SidebarIcon: React.FC<SidebarIconProps> = ({ icon, label, active = false, onClick }) => (
   <button
     onClick={onClick}
-    className={`group p-3 rounded-md w-full transition-colors flex justify-center ${
-      active
-        ? 'bg-[#1C3D5A] text-white'
-        : 'text-gray-700 hover:bg-[#1C3D5A] hover:text-white'
-    }`}
+    className={`group flex items-center gap-4 p-3 rounded-md w-full transition-colors duration-300 overflow-hidden whitespace-nowrap
+      ${active ? 'bg-[#1C3D5A] text-white' : 'text-gray-700 hover:bg-[#1C3D5A] hover:text-white'}`}
   >
     <div className="text-2xl">{icon}</div>
+    <span className="text-sm hidden group-hover/sidebar:inline-block">{label}</span>
   </button>
 );
 
-const adminMenuItems: { icon: ReactNode; path: string }[] = [
-  { icon: <MdOutlineSpaceDashboard />, path: '/admin/dashboard' },
-  { icon: <MdGroups />, path: '/admin/employee-database' },
-  { icon: <MdAccessTime />, path: '/admin/checkclock' },
-  { icon: <MdAssignment />, path: '/admin/letter-management' },
+const adminMenuItems = [
+  { icon: <MdOutlineSpaceDashboard />, path: '/admin/dashboard', label: 'Dashboard' },
+  { icon: <MdGroups />, path: '/admin/employee-database', label: 'Employee' },
+  { icon: <MdAccessTime />, path: '/admin/checkclock', label: 'Checkclock' },
+  { icon: <MdAssignment />, path: '/admin/letter-management', label: 'Letter' },
 ];
 
-const userMenuItems: { icon: ReactNode; path: string }[] = [
-  { icon: <MdOutlineSpaceDashboard />, path: '/user/dashboard' },
-  { icon: <MdGroups />, path: '/user/employee-database' },
-  { icon: <MdAccessTime />, path: '/user/checkclock' },
-  { icon: <MdAssignment />, path: '/user/letter-management' },
+const userMenuItems = [
+  { icon: <MdOutlineSpaceDashboard />, path: '/user/dashboard', label: 'Dashboard' },
+  { icon: <MdAccessTime />, path: '/user/checkclock', label: 'Checkclock' },
+  { icon: <MdAssignment />, path: '/user/letter-management', label: 'Letter' },
 ];
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Tentukan apakah user adalah admin atau user
   const isAdmin = pathname.startsWith('/admin');
   const isUser = pathname.startsWith('/user');
-
   const menuItems = isAdmin ? adminMenuItems : isUser ? userMenuItems : [];
 
   return (
-    <aside className="w-16 h-screen sticky top-0 bg-white flex flex-col items-center py-4 gap-6 shadow-md">
+    <aside className="group/sidebar relative h-screen sticky top-0 transition-all duration-300 bg-white shadow-md hover:w-48 w-16">
       {/* Logo */}
-      <img src="/logo.png" alt="Logo" className="w-6 h-auto" />
+      <div className="flex items-center gap-2 px-3 py-4 pl-5">
+        <img src="/logo.png" alt="Logo" className="w-6 h-auto" />
+        <span className="hidden group-hover/sidebar:inline-block text-base font-semibold">HRIS</span>
+      </div>
+
+      {/* Garis samar */}
+        <div className="border-b border-gray-300 opacity-50 mx-3" />
 
       {/* Menu Items */}
-      <div className="flex flex-col items-center gap-2 mt-4 w-full">
-        {menuItems.map(({ icon, path }) => {
-          const active =
-            pathname === path || pathname.startsWith(path + '/'); // Pastikan path yang dimulai dengan path tertentu juga aktif
+      <div className="flex flex-col gap-2 mt-4 w-full px-2">
+        {menuItems.map(({ icon, path, label }) => {
+          const active = pathname === path || pathname.startsWith(path + '/');
           return (
             <SidebarIcon
               key={path}
               icon={icon}
+              label={label}
               active={active}
               onClick={() => router.push(path)}
             />
