@@ -11,7 +11,6 @@ class Employee extends Model
         
     protected $fillable = [
         'user_id',
-        'ck_setting_id',
         'FirstName',
         'LastName',
         'Gender',
@@ -24,7 +23,7 @@ class Employee extends Model
         'NIK',
         'LastEducation',
         'PlaceOfBirth',
-        'DateOfBirth',
+        'BirthDate',
         'ContractType',
         'Bank',
         'BankAccountNumber',

@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import EmployeeForm from "@/components/EmployeeForm";
 import { usePageTitle } from "@/context/PageTitleContext";
+import { getEmployeeById, updateEmployee } from "@/lib/services/employee";
 
 export default function EditEmployeePage() {
   const { setTitle } = usePageTitle();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const [errorMessage, setErrorMessage] = useState("");
+  const params = useParams();
+  const rawId = params?.id;
+  const id =
+    typeof rawId === "string" ? rawId : Array.isArray(rawId) ? rawId[0] : "";
 
   const [initialData, setInitialData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,10 +27,12 @@ export default function EditEmployeePage() {
       try {
         if (!id) throw new Error("No ID provided");
 
-        const response = await axios.get(`/api/employees/${id}`);
+        const response = await getEmployeeById(id);
+
         setInitialData(response.data);
       } catch (error) {
         console.error("Failed to fetch employee data:", error);
+        setErrorMessage("Failed to update employee. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -37,28 +44,23 @@ export default function EditEmployeePage() {
     try {
       const data = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (value === null || value === undefined || value === "") return;
-
         if (value instanceof Date) {
           data.append(key, value.toISOString().split("T")[0]);
         } else if (value instanceof File) {
-          data.append(key, value);
-        } else if (typeof value === "number") {
-          data.append(key, value.toString());
+          if (value.size > 0) {
+            data.append(key, value);
+          }
         } else {
-          data.append(key, value as string);
+          data.append(key, value ?? "");
         }
       });
 
-      await axios.put('http://127.0.0.1:8000/api/employee/${id}', data);
+      await updateEmployee(id, data);
       router.push("/admin/employee-database");
     } catch (error) {
       console.error("Failed to update employee:", error);
     }
   };
-
-  if (loading) return <p>Loading...</p>;
-  if (!initialData) return <p>Employee not found.</p>;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">

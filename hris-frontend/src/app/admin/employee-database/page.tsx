@@ -22,6 +22,10 @@ type AvatarProps = {
 function EmployeeAvatar({ src, alt }: AvatarProps) {
   const [imgError, setImgError] = useState(false);
 
+  const baseUrl = "http://localhost:8000/storage/";
+
+  const fullSrc = src?.startsWith("http") ? src : `${baseUrl}${src}`;
+
   if (!src || imgError) {
     return (
       <div className="w-20 h-20 rounded-full bg-gray-300 mx-auto border border-gray-300" />
@@ -30,7 +34,7 @@ function EmployeeAvatar({ src, alt }: AvatarProps) {
 
   return (
     <img
-      src={src}
+      src={fullSrc}
       alt={alt}
       onError={() => setImgError(true)}
       className="w-20 h-20 rounded-full object-cover mx-auto border border-gray-300"
@@ -92,10 +96,10 @@ export default function EmployeeDatabasetPage() {
     if (!confirmDelete) return;
 
     try {
-      await deleteEmployee(id); // dari service
-      fetchEmployees(); // refresh list
+      await deleteEmployee(id); 
+      fetchEmployees(); 
     } catch (error) {
-      console.error("Gagal menghapus employee:", error);
+      console.error("Failed to delete employee:", error);
     }
   };
   const [imgError, setImgError] = useState(false);
@@ -237,7 +241,7 @@ export default function EmployeeDatabasetPage() {
                   <td className="px-4 py-2 text-center">
                     <div className="flex h-full items-center justify-center gap-2">
                       <button
-                        onClick={() => handleDelete(employee.id)}
+                        onClick={() => router.push(`/admin/employee-database/edit-employee-database/${employee.id}`)}
                         className="text-blue-500 hover:text-blue-700 text-xl
                       ">
                         <FiEdit />

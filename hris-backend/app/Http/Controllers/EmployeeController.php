@@ -22,28 +22,32 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'ck_setting_id' => 'required|exists:check_clock_setting,id',
             'FirstName' => 'required|string',
             'LastName' => 'required|string',
-            'Gender' => 'required|boolean|max:1',
+            'Gender' => 'required|string|in:Male,Female',
             'Address' => 'required|string',
             'PhoneNumber' => 'required|string',
             'Branch' => 'required|string',
             'Position' => 'required|string',
-            'Dvision' => 'required|string',
-            'Status' => 'required|boolean',
+            'Division' => 'required|string',
+            'Status' => 'required|string|in:Aktif,Tidak Aktif',
             'NIK' => 'required|string',
             'LastEducation' => 'required|string',
             'PlaceOfBirth' => 'required|string',
-            'DateOfBirth' => 'required|string',
+            'BirthDate' => 'required|string',
             'ContractType' => 'required|string',
             'Bank' => 'required|string',
             'BankAccountNumber' => 'required|string',
             'BankAccountHolderName' => 'required|string',
-            'photo' => 'nullable|string',
+            'photo' => 'required|file|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        $photo = $request->file('photo');
+        $filename = time() . '_' . $photo->getClientOriginalName();
+        $photoPath = $request->file('photo')->store('employee_photos', $filename, 'public');
+        $validated['photo'] = $photoPath;
 
         $employee = Employee::create($validated);
         return response()->json($employee, 201);
@@ -67,4 +71,13 @@ class EmployeeController extends Controller
         Employee::destroy($id);
         return response()->json(['message' => 'Data pegawai berhasil dihapus']);
     }
+
+    public function show($id)
+{
+    $employee = Employee::find($id);
+    if (!$employee) {
+        return response()->json(['message' => 'Employee not found'], 404);
+    }
+    return response()->json($employee);
+}
 }

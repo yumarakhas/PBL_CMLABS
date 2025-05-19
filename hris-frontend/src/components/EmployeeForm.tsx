@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { createEmployee } from "@/lib/services/employee";
 
 type EmployeeFormProps = {
   mode: "add" | "edit";
@@ -16,7 +17,7 @@ export default function AddEmployeePage({
   initialData,
   onSubmit,
 }: EmployeeFormProps) {
-  const { setTitle } = usePageTitle();
+  
   const router = useRouter();
   const [dob, setDob] = useState<Date | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -43,16 +44,17 @@ export default function AddEmployeePage({
   );
   const [LastName, setLastName] = useState(initialData?.LastName || "");
   const [NIK, setNIK] = useState(initialData?.NIK || "");
-  const [LasEducation, setLastEducation] = useState(
-    initialData?.LasEducation || ""
+  const [LastEducation, setLastEducation] = useState(
+    initialData?.LastEducation || ""
   );
   const [BirthDate, setBirthDate] = useState(initialData?.BirthDate || "");
   const [Branch, setBranch] = useState(initialData?.Branch || "");
-  const [BankAccountNumber, setBankAccountNmber] = useState(
+  const [BankAccountNumber, setBankAccountNumber] = useState(
     initialData?.BankAccountNumber || ""
   );
   const [Address, setAddress] = useState(initialData?.Address || "");
   const [Status, setStatus] = useState(initialData?.Status || "");
+  
 
   useEffect(() => {
     if (initialData) {
@@ -67,9 +69,9 @@ export default function AddEmployeePage({
       setBankAccountHolderName(initialData.BankAccountHolderName || "");
       setLastName(initialData.LastName || "");
       setNIK(initialData.NIK || "");
-      setLastEducation(initialData.LasEducation || "");
+      setLastEducation(initialData.LastEducation || "");
       setBranch(initialData.Branch || "");
-      setBankAccountNmber(initialData.BankAccountNumber || "");
+      setBankAccountNumber(initialData.BankAccountNumber || "");
       setAddress(initialData.Address || "");
       setStatus(initialData.Status || "");
 
@@ -114,7 +116,7 @@ export default function AddEmployeePage({
     if (!Status) newErrors.Status = "Status is required";
     if (!Branch) newErrors.Branch = "Branch is required";
     if (!ContractType) newErrors.ContractType = "Contract Type is required";
-    if (!LasEducation) newErrors.LasEducation = "Last Education is required";
+    if (!LastEducation) newErrors.LastEducation = "Last Education is required";
 
     if (!Bank) newErrors.Bank = "Bank is required";
     if (!BankAccountNumber.trim()) {
@@ -151,7 +153,7 @@ export default function AddEmployeePage({
       BankAccountHolderName,
       LastName,
       NIK,
-      LasEducation,
+      LastEducation,
       BirthDate: dob ? dob.toISOString().split("T")[0] : "",
       Branch,
       BankAccountNumber,
@@ -171,8 +173,7 @@ export default function AddEmployeePage({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow ">
-      <h2 className="text-xl font-semibold mb-6">Add Employee</h2>
-
+      
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-x-6">
         {/* Photo */}
         <div className="md:col-span-2 flex items-start gap-6 mb-6">
@@ -393,7 +394,7 @@ export default function AddEmployeePage({
           <div>
             <label className="block mb-1 font-medium">Last Education</label>
             <select
-              value={LasEducation}
+              value={LastEducation}
               onChange={(e) => setLastEducation(e.target.value)}
               className="w-full border px-3 py-2">
               <option>Choose Last Education</option>
@@ -478,12 +479,14 @@ export default function AddEmployeePage({
             </label>
             <input
               value={BankAccountNumber}
-              onChange={(e) => setBankAccountNmber(e.target.value)}
+              onChange={(e) => setBankAccountNumber(e.target.value)}
               placeholder="Enter your bank account number"
               className="w-full border px-3 py-2"
             />
             {errors.BankAccountNumber && (
-              <p className="text-red-500 text-sm mt-1">{errors.BankAccountNumber}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.BankAccountNumber}
+              </p>
             )}
           </div>
         </div>
