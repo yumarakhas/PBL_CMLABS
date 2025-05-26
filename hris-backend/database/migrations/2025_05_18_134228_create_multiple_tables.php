@@ -31,8 +31,7 @@ return new class extends Migration
             $table->string('BankAccountNumber');
             $table->string('BankAccountHolderName');
             $table->string('photo');
-            $table->timestamps(); 
-
+            $table->timestamps();
         });
 
         Schema::create('users', function (Blueprint $table) {
@@ -40,7 +39,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $table->string('email');
             $table->string('password');
-            $table->boolean('is_Admin');
+            $table->enum('role', ['admin', 'employee']);
             $table->timestamps();
         });
 
@@ -58,7 +57,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('content');
-            $table->integer('status');
+            $table->enum('type', ['published','archived', 'draft'])->default('arsip');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -68,8 +67,21 @@ return new class extends Migration
             $table->foreignId('letter_format_id')->constrained('letter_formats')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('name');
+            $table->text('file_path');
+            $table->foreignId('receiver_user_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->enum('type', ['arsip', 'kirim'])->default('arsip');
+            $table->enum('target_role', ['admin', 'employee'])->nullable();
+            $table->boolean('is_sent')->default(false);
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // penerima notifikasi
+            $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
+            $table->boolean('is_read')->default(false);
+            $table->timestamps();
         });
 
         Schema::create('check_clock_setting', function (Blueprint $table) {
@@ -139,5 +151,6 @@ return new class extends Migration
         Schema::dropIfExists('check_clocks_table');
         Schema::dropIfExists('salaries');
         Schema::dropIfExists('personal_access_tokens');
+        Schema::dropIfExists('notifications');
     }
 };

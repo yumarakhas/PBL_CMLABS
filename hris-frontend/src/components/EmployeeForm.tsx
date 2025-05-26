@@ -47,7 +47,7 @@ export default function AddEmployeePage({
   const [LastEducation, setLastEducation] = useState(
     initialData?.LastEducation || ""
   );
-  const [BirthDate, setBirthDate] = useState(initialData?.BirthDate || "");
+  
   const [Branch, setBranch] = useState(initialData?.Branch || "");
   const [BankAccountNumber, setBankAccountNumber] = useState(
     initialData?.BankAccountNumber || ""
@@ -75,8 +75,8 @@ export default function AddEmployeePage({
       setAddress(initialData.Address || "");
       setStatus(initialData.Status || "");
 
-      if (initialData.photo) {
-        setPhotoUrl(initialData.photo);
+      if (initialData.photo_url) {
+        setPhotoUrl(initialData.photo_url);
         setphoto(null);
       }
 

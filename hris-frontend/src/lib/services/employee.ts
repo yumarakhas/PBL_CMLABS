@@ -1,5 +1,4 @@
 import api from '../api';
-import axios from 'axios';
 
 export const getEmployees = () => api.get('/employee');
 export const getEmployee = (id: number) => api.get(`/employee/${id}`);
@@ -14,7 +13,8 @@ export const createEmployee = (data: FormData) => {
   }); 
 };
 export const updateEmployee = (id: string | number, data: FormData) => {
-  return api.put(`/employee/${id}`, data,{
+  data.append("_method", "PUT");
+  return api.post(`/employee/${id}`, data,{
     headers: {
       "Content-Type": "multipart/form-data",
     },

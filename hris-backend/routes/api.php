@@ -7,7 +7,8 @@ use App\Http\Controllers\CheckClockController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LettersController;
 use App\Http\Controllers\LetterFormatsController;
-use App\Models\Letter_formats as ModelsLetter_formats;
+use Illuminate\Notifications\Notification;
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -53,6 +54,37 @@ Route::prefix('letterFormats')->group(function () {
     Route::put('/{id}', [LetterFormatsController::class, 'update']);
     Route::delete('/{id}', [LetterFormatsController::class, 'destroy']);
 });
+
+Route::get('/notifications', function () {
+    return Notification::with('letter')
+        ->where('user_id', auth()->id())
+        ->where('is_read', false)
+        ->get();
+});
+
+Route::post('/notifications/{id}/read', function ($id) {
+    $notif = Notification::where('user_id', auth()->id())->findOrFail($id);
+    $notif->update(['is_read' => true]);
+
+    return response()->json(['message' => 'Notifikasi dibaca']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/notifications', function () {
+        return Notification::with('letter')
+            ->where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->get();
+    });
+
+    Route::post('/notifications/{id}/read', function ($id) {
+        $notif = Notification::where('user_id', auth()->id())->findOrFail($id);
+        $notif->update(['is_read' => true]);
+
+        return response()->json(['message' => 'Notifikasi dibaca']);
+    });
+});
+
 
 Route::get('/test', function () {
     return response()->json(['message' => 'API works!']);

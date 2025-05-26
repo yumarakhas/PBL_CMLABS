@@ -11,7 +11,7 @@ import {
 } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-// import api from "@/lib/api"; implementasi backend nanti
+import { getLetters } from "@/lib/services/letter";
 
 interface LetterType {
   id: number;
@@ -24,9 +24,18 @@ export default function LetterManagementPage() {
   const { setTitle } = usePageTitle();
   const router = useRouter();
 
-  const [letters, setLetters] = useState<Letter[]>([]);
+  const [letters, setLetters] = useState<LetterType[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const fetchLetters = async () =>{
+    try{
+      const res = await getLetters();
+      const letters = res.data;
+    }catch (error){
+      console.error("Error fetching letters", error);
+    }
+  };
 
   const totalItems = letters.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -44,41 +53,8 @@ export default function LetterManagementPage() {
   useEffect(() => {
     setTitle("Letter Management");
 
-    // DATA DUMMY (sementara, ganti ke API nanti)
-    setLetters([
-      {
-        id: 1,
-        title: "Budi Santoso",
-        type: "employment contract",
-        content: "Surat Resmi Dari Kementerian Lingkungan",
-      },
-      {
-        id: 2,
-        title: "Andi Baskara",
-        type: "employment contract",
-        content: "Penghargaan Bakti Angkasa",
-      },
-      {
-        id: 3,
-        title: "Suyono",
-        type: "employment contract",
-        content: "Sertifikasi Google Loooker Studio",
-      },
-    ]);
-
-    // Kalau mau fetch API nanti:
-    // fetchLetters();
+    fetchLetters();
   }, [setTitle]);
-
-  // integrasi ke backend
-  // const fetchLetters = async () => {
-  //   try {
-  //     const res = await api.get("/api/letters");
-  //     setLetters(res.data); // sesuaikan sesuai response backend
-  //   } catch (error) {
-  //     console.error("Gagal fetch surat:", error);
-  //   }
-  // };
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -90,8 +66,25 @@ export default function LetterManagementPage() {
 
   return (
     <div className="space-y-6">
+      {/* Summary Cards */}
+      <div>
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { label: "Period" },
+            { label: "Incoming Mail" },
+            { label: "Sent Mail" },
+            { label: "Company Archives" },
+          ].map((item, index) => (
+            <div key={index} className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-sm text-gray-500">{item.label}</h3>
+              <p className="text-xl font-bold">xxxx</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Header + Actions */}
       <div className="bg-white p-6 rounded-lg shadow">
-        {/* Header + Actions */}
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">List Of Letter</h2>
           <div className="flex gap-4">
@@ -125,7 +118,7 @@ export default function LetterManagementPage() {
         {/* Table */}
         <div className="relative pt-6 overflow-x-auto bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-500">
-            <thead className="bg-gray-800">
+            <thead className="bg-[#1E3A5F]">
               <tr>
                 <th className="px-4 py-2 text-center text-sm font-semibold text-white">
                   No.
@@ -155,14 +148,14 @@ export default function LetterManagementPage() {
                   <td className="px-4 py-2 text-center">{letter.content}</td>
                   <td className="px-4 py-2 text-center">
                     <div className="flex h-full items-center justify-center gap-2">
-                      <button className="text-blue-500 hover:text-blue-700 text-xl">
+                      <button className="text-white bg-gray-600 px-2 py-2 rounded-md hover:opacity-70 text-xl">
                         <FiEdit />
                       </button>
-                      <button className="text-red-500 hover:text-red-700 text-xl">
+                      <button className="text-white bg-red-700 px-2 py-2 rounded-md hover:opacity-70 text-xl">
                         <FiTrash2 />
                       </button>
                       <button
-                        className="text-gray-500 hover:text-gray-700 text-xl"
+                        className="text-white bg-blue-700 px-2 py-2 rounded-md hover:opacity-70 text-xl"
                         onClick={() => {
                           setSelectedLetter(letter);
                           setShowModal(true);
