@@ -45,14 +45,18 @@ export default function EditEmployeePage() {
       const data = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (value instanceof Date) {
-          data.append(key, value.toISOString().split("T")[0]);
-        } else if (value instanceof File) {
-          if (value.size > 0) {
-            data.append(key, value);
-          }
-        } else {
-          data.append(key, value ?? "");
+        data.append(key, value.toISOString().split("T")[0]);
+      } else if (value instanceof File) {
+        if (value.size > 0) {
+          data.append(key, value);
         }
+      } else if (typeof value === "number" || typeof value === "boolean") {
+        data.append(key, value.toString());
+      } else if (value !== null && value !== undefined) {
+        data.append(key, String(value));
+      } else {
+        data.append(key, ""); 
+      }
       });
 
       await updateEmployee(id, data);

@@ -1,110 +1,108 @@
 "use client";
 import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
-import { useRouter } from "next/navigation";
 
 export default function AddLetterManagementPage() {
   const { setTitle } = usePageTitle();
-  const router = useRouter();
-  const [selectedOption, setSelectedOption] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState("");
+  const [title, setTitleText] = useState("");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState("");
+
+  useEffect(() => {
+    setTitle("Letter Management");
+  }, [setTitle]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert("Data submitted!");
   };
 
-  useEffect(() => {
-    setTitle("Add Letter Management");
-  }, [setTitle]);
+return (
+  <div className="min-h-screen bg-gray-100 p-6">
+    <div className="flex flex-col md:flex-row w-full gap-6">
+      
+      {/* Left Section */}
+      <form
+        onSubmit={handleSubmit}
+        className="w-full md:w-1/2 flex flex-col gap-6"
+      >
+        {/* Upload Letter Card */}
+        <div className="bg-white shadow-lg rounded-md p-6">
+          <label className="block text-lg font-semibold mb-4">Upload Letter</label>
+          <select
+            value={selectedLetter}
+            onChange={(e) => setSelectedLetter(e.target.value)}
+            className="w-full border border-gray-300 px-4 py-2 rounded"
+          >
+            <option value="">-Choose letter-</option>
+            <option value="invitation">Invitation</option>
+            <option value="notice">Notice</option>
+          </select>
+        </div>
 
-  return (
-    <div className="p-6">
-      <div className="bg-white shadow-md rounded-md p-6 w-full max-w-4xl mx-auto space-y-4">
-        <label className="block text-lg font-medium">Add Letter</label>
-        <select
-          className="w-1/4 border border-gray-300 rounded px-4 py-2"
-          value={selectedOption}
-          onChange={(e) => setSelectedOption(e.target.value)}>
-          <option value="">--None--</option>
-          <option value="fill">Fill the document</option>
-          <option value="upload">Upload Document</option>
-        </select>
-
-        {/* Fill the Document Form */}
-        {selectedOption === "fill" && (
-          <div className="border p-4 rounded-md space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block font-medium mb-1">Title</label>
-                <input
-                  type="text"
-                  placeholder="Enter the title"
-                  className="w-full border border-gray-300 px-4 py-2 rounded"
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Type Of Letter</label>
-                <select className="w-full border border-gray-300 px-4 py-2 rounded">
-                  <option value="">--Choose type of letter--</option>
-                  <option value="invitation">Invitation</option>
-                  <option value="notice">Notice</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block font-medium mb-1">Content</label>
-              <textarea
-                placeholder="Enter the content"
-                className="w-full h-40 border border-gray-300 px-4 py-2 rounded"
-              />
-            </div>
-
-            {/* Tombol */}
-            <div className="col-span-2 flex justify-end space-x-3 mt-4">
-              <button
-                type="button"
-                onClick={() => router.push("/admin/letter-management")}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                Save
-              </button>
-            </div>
+        {/* Create Announcement Card */}
+        <div className="bg-white shadow-lg rounded-md p-6 space-y-4">
+          <label className="block text-lg font-semibold mb-2">Create Announcement</label>
+          
+          <div>
+            <label className="block mb-1 font-medium">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitleText(e.target.value)}
+              className="w-full border border-gray-300 px-4 py-2 rounded"
+            />
           </div>
-        )}
 
-        {/* Upload Document Form */}
-        {selectedOption === "upload" && (
-          <div className="border p-4 rounded-md space-y-4">
-            <div>
-              <label className="block font-medium mb-1">Upload Document</label>
-              <input
-                type="file"
-                className="w-full border border-gray-300 px-4 py-2 rounded"
-              />
-            </div>
-
-            {/* Tombol */}
-            <div className="col-span-2 flex justify-end space-x-3 mt-4">
-              <button
-                type="button"
-                onClick={() => router.push("/admin/letter-management")}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                Save
-              </button>
-            </div>
+          <div>
+            <label className="block mb-1 font-medium">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border border-gray-300 px-4 py-2 rounded"
+            />
           </div>
-        )}
+
+          <div>
+            <label className="block mb-1 font-medium">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full border border-gray-300 px-4 py-2 rounded resize-none"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-4 pt-2">
+            <button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
+              Preview
+            </button>
+            <button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {/* Right Section - Preview */}
+      <div className="bg-white shadow-lg rounded-md p-6 w-full md:w-1/2 flex flex-col">
+        <label className="block text-lg font-semibold mb-2">Preview</label>
+        <div className="border border-gray-300 rounded-md flex-1 min-h-[400px] flex items-center justify-center text-gray-400 text-xl">
+          None
+        </div>
       </div>
     </div>
-  );
+  </div>
+);
+
+
 }
