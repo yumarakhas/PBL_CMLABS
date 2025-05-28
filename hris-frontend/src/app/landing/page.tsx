@@ -1,7 +1,12 @@
+"use client";
 import Image from 'next/image';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans">
       {/* Header */}
@@ -45,17 +50,26 @@ export default function LandingPage() {
 
 
       {/* Features / Packages Section */}
-      <section
-        id="features"
-        className="bg-gray-50 py-20 px-12 max-w-7xl mx-auto rounded-lg shadow-lg"
+      <section id="features" className="bg-gray-100 py-20 px-12 max-w-7xl mx-auto rounded-lg shadow-lg"
       >
         <h2 className="text-4xl font-bold mb-14 text-center text-gray-900">Choose the HRIS Packages right for you</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
+            {
+              title: "Free",
+              subtitle: "Best for growing business",
+              features: [
+                "GPS-based attendance validation",
+                "Employee data management",
+                "Leave & time-off requests",
+                "Overtime management (government regulations)",
+                "Fixed work schedule management",
+                "Automatic tax calculation"
+              ]
+            },
             {
               title: 'Standard',
               features: [
-                'List fitur',
                 'GPS-based attendance validation',
                 'Employee data management',
                 'Leave & time-off requests',
@@ -88,10 +102,11 @@ export default function LandingPage() {
               ],
             },
           ].map((plan, idx) => (
-            <div
-              key={idx}
-              className="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition p-8 flex flex-col"
-            >
+              <div
+                key={idx}
+                className="bg-white border border-gray-200 rounded-xl shadow-md p-8 flex flex-col transition-all duration-300 ease-in-out transform hover:scale-[1.03] hover:shadow-xl text-sm"
+              >
+
               <h3 className="text-2xl font-semibold mb-6 text-blue-700">{plan.title}</h3>
               <ul className="space-y-3 mb-8 flex-grow">
                 {plan.features.map((feature, fidx) => (
@@ -110,9 +125,12 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className="bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition w-full">
+              <button
+                onClick={() => router.push("/seat-plans")}
+                className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-[#1E3A5F] transition cursor-pointer"
+              >
                 Select a Package →
-              </Button>
+              </button>
             </div>
           ))}
         </div>
