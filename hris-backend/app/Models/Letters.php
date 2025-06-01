@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Letter_formats;
-use App\Models\Notification;
 
 class Letters extends Model
 {
@@ -15,21 +13,30 @@ class Letters extends Model
     protected $fillable = [
         'letter_format_id',
         'user_id',
-        'receiver_user_id',
-        'target_role',
-        'type',
-        'status',
-        'name',
+        'resignation_date',
+        'reason_resign',
+        'additional_notes',
+        'current_division',
+        'requested_division',
+        'reason_transfer',
+        'current_salary',
+        'requested_salary',
+        'reason_salary',
+        'leave_start',
+        'return_to_work',
+        'reason_for_leave',
+        'is_sent',
+        'is_approval',
     ];
 
-    public function format()
+    public function letterFormat()
     {
-        return $this->belongsTo(Letter_formats::class, 'letter_format_id');
+        return $this->belongsTo(Letters::class);
     }
 
-    public function sender()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function receiver()

@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\EmployeeAchievement;
 
 class Employee extends Model
 {
     use HasFactory;
-        
+
     protected $fillable = [
         'user_id',
         'FirstName',
@@ -29,5 +30,11 @@ class Employee extends Model
         'BankAccountNumber',
         'BankAccountHolderName',
         'photo',
+        'Notes',
     ];
+
+    public function achievements()
+    {
+         return $this->hasMany(Achievement::class, 'employee_id');
+    }
 }

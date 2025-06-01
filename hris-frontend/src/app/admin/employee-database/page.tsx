@@ -45,6 +45,10 @@ function EmployeeAvatar({ src, alt }: AvatarProps) {
   );
 }
 
+type AchievementType = {
+  file_path?: string;
+};
+
 type EmployeeType = {
   id: number;
   photo?: string;
@@ -65,6 +69,8 @@ type EmployeeType = {
   BankAccountNumber: string;
   BankAccountHolderName: string;
   Address: string;
+  Notes: string;
+  Achievements: AchievementType[];
 };
 
 export default function EmployeeDatabasetPage() {
@@ -121,7 +127,13 @@ export default function EmployeeDatabasetPage() {
   const fetchEmployees = async () => {
     try {
       const res = await getEmployees();
-      const employees = res.data;
+      const employees = res.data.map((emp: any) => ({
+        ...emp,
+        Achievements:
+          typeof emp.Achievements === "string"
+            ? JSON.parse(emp.Achievements)
+            : emp.Achievements,
+      }));
       const currentDate = new Date();
 
       const activeCount = employees.filter((emp: any) => {
@@ -173,6 +185,7 @@ export default function EmployeeDatabasetPage() {
       BankAccountNumber: emp.BankAccountNumber,
       BankAccountHolderName: emp.BankAccountHolderName,
       Address: emp.Address,
+      Notes: emp.Notes || "",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -192,73 +205,7 @@ export default function EmployeeDatabasetPage() {
     saveAs(dataBlob, fileName);
   };
 
-  // type FilterCategory = "Branches" | "Positions" | "Divisions" | "Statuses";
-
-  // type FilterOptions = {
-  //   Branches: string[];
-  //   Positions: string[];
-  //   Divisions: string[];
-  //   Statuses: string[];
-  // };
-
-  // type SelectedFilters = {
-  //   Branches: string[];
-  //   Positions: string[];
-  //   Divisions: string[];
-  //   Statuses: string[];
-  // };
-
-  // const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
-  //   Branches: [],
-  //   Positions: [],
-  //   Divisions: [],
-  //   Statuses: [],
-  // });
-
-  // const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-  //   Branches: [],
-  //   Positions: [],
-  //   Divisions: [],
-  //   Statuses: [],
-  // });
-
-  // const toggleFilter = (category: FilterCategory, value: string) => {
-  //   setSelectedFilters((prev) => {
-  //     const current = prev[category];
-  //     return {
-  //       ...prev,
-  //       [category]: current.includes(value)
-  //         ? current.filter((v) => v !== value)
-  //         : [...current, value],
-  //     };
-  //   });
-  // };
-
-  // const applyFilter = async () => {
-  //   try {
-  //     const query = new URLSearchParams();
-  //     Object.entries(selectedFilters).forEach(([key, values]) => {
-  //       values.forEach((val) => query.append(`${key}[]`, val));
-  //     });
-
-  //     const res = await fetch(`/api/employees?${query.toString()}`);
-  //     if (!res.ok) throw new Error("Failed to fetch filtered employees");
-
-  //     const data = await res.json();
-  //     setEmployees(data);
-  //   } catch (error) {
-  //     console.error("Filter error:", error);
-  //   }
-  // };
-
   useEffect(() => {
-    // const fetchFilters = async () => {
-    //   const res = await fetch("/api/filters");
-    //   const data = await res.json();
-    //   setFilterOptions(data);
-    // };
-
-    // fetchFilters();
     setTitle("Employee Database");
     fetchEmployees();
   }, [setTitle]);
@@ -456,7 +403,7 @@ export default function EmployeeDatabasetPage() {
             </button>
           </div>
         </div>
-        
+
         {showFilterModal && (
           <div className="fixed inset-0 z-50 flex justify-end bg-black/30">
             <div className="w-full max-w-md h-full bg-white shadow-lg overflow-y-auto p-6">
@@ -569,123 +516,147 @@ export default function EmployeeDatabasetPage() {
         )}
 
         {showModal && selectedEmployee && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white font-bold rounded-xl shadow-2xl p-6 w-full max-w-xl z-50 overflow-y-auto max-h-[90vh]">
-              <h2 className="text-lg bg-[#1E3A5F] rounded-xl px-2 py-2 mb-4 text-center text-white">
-                Detail Information
-              </h2>
+          <div className="fixed inset-0 z-50 flex justify-end bg-black/30">
+            <div className="w-full max-w-md h-full bg-white shadow-lg overflow-y-auto p-6">
+              {/* Header */}
+              <div className="flex justify-between items-center border-b pb-4 mb-4">
+                <h2 className="text-xl font-semibold">Employee Details</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-2xl">
+                  <MdClose />
+                </button>
+              </div>
 
-              {/* Header - Foto + Nama + Posisi */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-20 h-20 rounded-full overflow-hidden">
+              {/* Employee Info */}
+              <div className="flex items-center mb-6 border p-4 rounded-md">
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
                   <EmployeeAvatar
                     src={selectedEmployee.photo}
                     alt={selectedEmployee.FirstName}
                   />
                 </div>
                 <div>
-                  <p className="text-xl font-semibold">{`${selectedEmployee.FirstName} ${selectedEmployee.LastName}`}</p>
-                  <p className="text-gray-600">{selectedEmployee.Position}</p>
-                  <p className="text-gray-600">{selectedEmployee.Division}</p>
+                  <h3 className="font-bold text-lg">{`${selectedEmployee.FirstName} ${selectedEmployee.LastName}`}</h3>
+                  <p className="text-sm text-gray-600">
+                    {selectedEmployee.Position}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {selectedEmployee.Division}
+                  </p>
                 </div>
               </div>
 
-              {/* Personal & Bank Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
-                {/* Personal Info */}
-                <div>
-                  <h1 className="font-bold mb-3">Personal Information</h1>
-                  <div className=" shadow-md rounded-xl p-4 bg-gray-50 text-black text-sm space-y-2 grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-gray-500">Place Of Birth</p>
-                      <p className="font-medium">
-                        {selectedEmployee.PlaceOfBirth}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Date Of Birth</p>
-                      <p className="font-medium">
-                        {selectedEmployee.BirthDate}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Gender</p>
-                      <p className="font-medium">{selectedEmployee.Gender}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">NIK</p>
-                      <p className="font-medium">{selectedEmployee.NIK}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Last Education</p>
-                      <p className="font-medium">
-                        {selectedEmployee.LastEducation}
-                      </p>
-                    </div>
+              {/* Personal Info */}
+              <div className="border rounded-md p-4 mb-4">
+                <h4 className="font-semibold mb-3">Personal Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Place Of Birth</p>
+                    <p className="font-medium">
+                      {selectedEmployee.PlaceOfBirth}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Date Of Birth</p>
+                    <p className="font-medium">{selectedEmployee.BirthDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Gender</p>
+                    <p className="font-medium">{selectedEmployee.Gender}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">NIK</p>
+                    <p className="font-medium">{selectedEmployee.NIK}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-gray-500">Last Education</p>
+                    <p className="font-medium">
+                      {selectedEmployee.LastEducation}
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                {/* Bank Info */}
-                <div>
-                  <h1 className="font-bold mb-3">Bank Information</h1>
-                  <div className="shadow-md rounded-xl p-4 bg-gray-50 text-sm space-y-2">
-                    <div>
-                      <p className="text-gray-500">Bank</p>
-                      <p className="font-medium">{selectedEmployee.Bank}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Account Holder Name</p>
-                      <p className="font-medium">
-                        {selectedEmployee.BankAccountHolderName}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Account Number</p>
-                      <p className="font-medium">
-                        {selectedEmployee.BankAccountNumber}
-                      </p>
-                    </div>
+              {/* Bank Info */}
+              <div className="border rounded-md p-4 mb-4">
+                <h4 className="font-semibold mb-3">Bank Information</h4>
+                <div className="grid grid-cols-1 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Bank</p>
+                    <p className="font-medium">{selectedEmployee.Bank}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Account Holder Name</p>
+                    <p className="font-medium">
+                      {selectedEmployee.BankAccountHolderName}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Account Number</p>
+                    <p className="font-medium">
+                      {selectedEmployee.BankAccountNumber}
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Additional Info */}
-              <div className="grid grid-cols-2 gap-2">
-                <h1 className="font-bold mb-3 col-span-2">
-                  Additional Information
-                </h1>
-
-                <div className="mb-3 shadow-md rounded-xl p-4 bg-gray-50 text-sm space-y-2 col-span-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-gray-500">Branch</p>
-                      <p className="font-medium">{selectedEmployee.Branch}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Contract Type</p>
-                      <p className="font-medium">
-                        {selectedEmployee.ContractType}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Status</p>
-                      <p className="font-medium">{selectedEmployee.Status}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Address</p>
-                      <p className="font-medium">{selectedEmployee.Address}</p>
-                    </div>
+              <div className="border rounded-md p-4 mb-4">
+                <h4 className="font-semibold mb-3">Additional Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Branch</p>
+                    <p className="font-medium">{selectedEmployee.Branch}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Contract Type</p>
+                    <p className="font-medium">
+                      {selectedEmployee.ContractType}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Status</p>
+                    <p className="font-medium">{selectedEmployee.Status}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Address</p>
+                    <p className="font-medium">{selectedEmployee.Address}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Tombol Close */}
-              <div className="text-right">
-                <button
-                  className="bg-green-700 text-white px-4 py-1 rounded hover:bg-green-800"
-                  onClick={() => setShowModal(false)}>
-                  Close
-                </button>
+              <div className="border rounded-md p-4 mb-4">
+                <h4 className="font-semibold mb-3">Achievements</h4>
+                {selectedEmployee.Achievements &&
+                selectedEmployee.Achievements.length > 0 ? (
+                  <ul className="list-disc list-inside space-y-1">
+                    {selectedEmployee.Achievements.map((achievement, index) => (
+                      <li key={index} className="font-medium">
+                        <a
+                          href={`${process.env.NEXT_PUBLIC_API_URL}/storage/${achievement.file_path}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline">
+                          {achievement.file_path?.split("/").pop() ??
+                            "Unnamed Achievement"}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No achievements available</p>
+                )}
+              </div>
+
+              <div className="border rounded-md p-4 mb-4">
+                <h4 className="font-semibold mb-3">Notes</h4>
+                {selectedEmployee.Notes &&
+                selectedEmployee.Notes.trim() !== "" ? (
+                  <p className="font-medium">{selectedEmployee.Notes}</p>
+                ) : (
+                  <p className="text-gray-500">No notes available</p>
+                )}
               </div>
             </div>
           </div>
