@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Letters;
 use App\Models\User;
-use App\Models\Notification; 
+use App\Http\Requests\StoreLetterRequest;
 
 class LettersController extends Controller
 {
@@ -17,39 +17,28 @@ class LettersController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'letter_format_id' => 'required|exists:letter_formats,id',
-            'name' => 'required|string',
-            'file' => 'required|file',
-            'type' => 'required|in:arsip,kirim',
-            'target_role' => 'nullable|in:admin,employee',
+            'user_id' => 'required|exists:users,id',
+            'resignation_date' => 'nullable|date',
+            'reason_resign' => 'nullable|string',
+            'additional_notes' => 'nullable|string',
+            'current_division' => 'nullable|string',
+            'requested_division' => 'nullable|string',
+            'reason_transfer' => 'nullable|string',
+            'current_salary' => 'nullable|integer',
+            'requested_salary' => 'nullable|integer',
+            'reason_salary' => 'nullable|string',
+            'leave_start' => 'nullable|date',
+            'return_to_work' => 'nullable|date',
+            'reason_for_leave' => 'nullable|string',
+            'is_sent' => 'boolean',
+            'is_approval' => 'boolean',
         ]);
 
-        $path = $request->file('file')->store('letters', 'public');
+        $letter = Letters::create($validated);
+        return response()->json($letter, 201);
 
-        $letter = Letters::create([
-            'letter_format_id' => $request->letter_format_id,
-            'user_id' => auth()->id(),
-            'name' => $request->name,
-            'file_path' => $path,
-            'type' => $request->type,
-            'target_role' => $request->target_role,
-            'is_sent' => $request->type === 'kirim',
-        ]);
-
-        // Jika dikirim, buat notifikasi ke semua user dengan role target
-        if ($letter->is_sent && $letter->target_role) {
-            $receivers = User::where('role', $letter->target_role)->get();
-
-            foreach ($receivers as $receiver) {
-                Notification::create([
-                    'user_id' => $receiver->id,
-                    'letter_id' => $letter->id,
-                ]);
-            }
-        }
-
-        return response()->json(['message' => 'Surat berhasil disimpan', 'data' => $letter], 201);
     }
 
     public function show(string $id)

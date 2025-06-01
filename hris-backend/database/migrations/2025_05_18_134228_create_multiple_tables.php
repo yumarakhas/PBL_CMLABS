@@ -11,8 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->enum('role', ['admin', 'employee']);
+            $table->timestamps();
+        });
+
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('FirstName');
             $table->string('LastName');
             $table->string('Gender');
@@ -31,15 +41,52 @@ return new class extends Migration
             $table->string('BankAccountNumber');
             $table->string('BankAccountHolderName');
             $table->string('photo');
+            $table->text('Notes')->nullable();
             $table->timestamps();
         });
 
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('achievements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
-            $table->string('email');
-            $table->string('password');
-            $table->enum('role', ['admin', 'employee']);
+            $table->string('file_path')->nullable(); // ← tambahkan ini
+            $table->timestamps();
+        });
+
+        Schema::create('company', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('head_office_addfress');
+            $table->string('phone');
+            $table->string('phone_backup')->nullable();
+            $table->string('email')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('branches', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->string('branch_name');
+            $table->string('branch_address');
+            $table->string('branch_phone');
+            $table->string('branch_phone_backup')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('divisions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->string('division_name');
+            $table->string('division_description')->nullable();
+            $table->foreignId('branch_id')->constrained('branches')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        Schema::create('positions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->string('position_name');
+            $table->string('position_description')->nullable();
+            $table->foreignId('division_id')->constrained('divisions')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -57,7 +104,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('content');
-            $table->enum('type', ['published','archived', 'draft'])->default('arsip');
+            $table->enum('type', ['published', 'archived', 'draft']);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -66,23 +113,24 @@ return new class extends Migration
             $table->id();
             $table->foreignId('letter_format_id')->constrained('letter_formats')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('name');
-            $table->text('file_path');
-            $table->foreignId('receiver_user_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->enum('type', ['arsip', 'kirim'])->default('arsip');
-            $table->enum('target_role', ['admin', 'employee'])->nullable();
+            $table->date('resignation_date')->nullable();
+            $table->text('reason_resign')->nullable();
+            $table->text('additional_notes')->nullable();
+            $table->string('current_division')->nullable();
+            $table->string('requested_division')->nullable();
+            $table->text('reason_transfer')->nullable();
+            $table->integer('current_salary')->nullable();
+            $table->integer('requested_salary')->nullable(); // perbaiki huruf kecil semua
+            $table->text('reason_salary')->nullable();
+            $table->date('leave_start')->nullable();
+            $table->date('return_to_work')->nullable();
+            $table->text('reason_for_leave')->nullable();
             $table->boolean('is_sent')->default(false);
+            $table->boolean('is_approval')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });
 
-        Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // penerima notifikasi
-            $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
-            $table->boolean('is_read')->default(false);
-            $table->timestamps();
-        });
 
         Schema::create('check_clock_setting', function (Blueprint $table) {
             $table->id();
@@ -151,6 +199,6 @@ return new class extends Migration
         Schema::dropIfExists('check_clocks_table');
         Schema::dropIfExists('salaries');
         Schema::dropIfExists('personal_access_tokens');
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('employee_achievements');
     }
 };

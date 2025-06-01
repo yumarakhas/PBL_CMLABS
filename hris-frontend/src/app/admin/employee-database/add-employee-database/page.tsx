@@ -7,6 +7,7 @@ import axios from "axios";
 import EmployeeForm from "@/components/EmployeeForm";
 import api from "@/lib/api";
 import { createEmployee } from "@/lib/services/employee";
+import { buildEmployeeFormData } from "@/lib/utils/formData";
 
 export default function AddEmployeePage() {
   const { setTitle } = usePageTitle();
@@ -16,30 +17,13 @@ export default function AddEmployeePage() {
     setTitle("Employee");
   }, [setTitle]);
 
-  const handleAdd = async (formData: any) => {
+  const handleAdd = async (formDataObj: any) => {
     try {
-      const data = new FormData();
+      const data = buildEmployeeFormData(formDataObj);
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value === null || value === undefined || value === "") return;
-
-        // Handle date
-        if (value instanceof Date) {
-          data.append(key, value.toISOString().split("T")[0]);
-        }
-        // Handle file (photo)
-        else if (value instanceof File) {
-          data.append(key, value);
-        }
-        // Handle number
-        else if (typeof value === "number") {
-          data.append(key, value.toString());
-        }
-        // Default: string
-        else {
-          data.append(key, value as string);
-        }
-      });
+      for (const pair of data.entries()) {
+        console.log(pair[0], pair[1]);
+      }
 
       await createEmployee(data);
       router.push("/admin/employee-database");

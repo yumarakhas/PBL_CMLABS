@@ -6,6 +6,7 @@ import axios from "axios";
 import EmployeeForm from "@/components/EmployeeForm";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { getEmployeeById, updateEmployee } from "@/lib/services/employee";
+import { buildEmployeeFormData } from "@/lib/utils/formData";
 
 export default function EditEmployeePage() {
   const { setTitle } = usePageTitle();
@@ -38,26 +39,15 @@ export default function EditEmployeePage() {
       }
     };
     fetchData();
-  }, [id, setTitle]);
+  }, []);
 
-  const handleUpdate = async (formData: any) => {
+  const handleUpdate = async (formDataObj: any) => {
     try {
-      const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value instanceof Date) {
-        data.append(key, value.toISOString().split("T")[0]);
-      } else if (value instanceof File) {
-        if (value.size > 0) {
-          data.append(key, value);
-        }
-      } else if (typeof value === "number" || typeof value === "boolean") {
-        data.append(key, value.toString());
-      } else if (value !== null && value !== undefined) {
-        data.append(key, String(value));
-      } else {
-        data.append(key, ""); 
+      const data = buildEmployeeFormData(formDataObj);
+
+      for (const pair of data.entries()) {
+        console.log(pair[0], pair[1]);
       }
-      });
 
       await updateEmployee(id, data);
       router.push("/admin/employee-database");
