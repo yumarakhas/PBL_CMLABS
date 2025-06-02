@@ -89,7 +89,7 @@ export default function AddEmployeePage({
       setStatus(initialData.Status || "");
       setNotes(initialData.Notes || "");
       setAchievements([]);
-      setExistingAchievements(initialData.Achievements || []);
+      setExistingAchievements(initialData?.achievement_files ?? []);
 
       if (initialData.photo_url) {
         setPhotoUrl(initialData.photo_url);
@@ -225,6 +225,21 @@ export default function AddEmployeePage({
 
   const handleRemoveExistingAchievement = (index: number) => {
     setExistingAchievements((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const getOriginalFileName = (fileNameWithTimestamp: string) => {
+    const parts = fileNameWithTimestamp.split("_");
+    if (parts.length < 2) return fileNameWithTimestamp; // fallback kalau gak sesuai format
+
+    const timestampPart = parts.pop(); // ambil bagian timestamp.ext
+    const timestampMatch = timestampPart?.match(/^(\d+)\.(\w+)$/);
+
+    if (!timestampMatch) return fileNameWithTimestamp;
+
+    const extension = timestampMatch[2];
+    const originalName = parts.join("_");
+
+    return `${originalName}.${extension}`;
   };
 
   return (
@@ -578,17 +593,22 @@ export default function AddEmployeePage({
                 className="mt-2"
               />
             </div>
-
             {/* Preview for NEW Achievements */}
             <div className="grid grid-cols-2 gap-2">
-              {Achievements.map((file, index) => (
+              {Achievements.map((file, idx) => (
                 <div
-                  key={index}
+                  key={`${file.name}-${file.size}-${idx}`}
                   className="flex items-center justify-between bg-gray-100 p-2 rounded">
                   <span className="text-sm">{file.name}</span>
                   <button
                     type="button"
-                    onClick={() => handleRemoveAchievement(index)}
+                    onClick={() =>
+                      handleRemoveAchievement(
+                        Achievements.findIndex(
+                          (f) => f.name === file.name && f.size === file.size
+                        )
+                      )
+                    }
                     className="text-red-500 text-xs">
                     Remove
                   </button>
@@ -596,28 +616,27 @@ export default function AddEmployeePage({
               ))}
             </div>
 
-            {/* Preview for EXISTING Achievements (from server) */}
-            <div className="grid grid-cols-2 gap-2 mt-4">
-              {existingAchievements.map((file, index) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between bg-gray-100 p-2 rounded">
-                  <a
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm underline text-blue-600">
-                    {file.name}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveExistingAchievement(index)}
-                    className="text-red-500 text-xs">
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
+            {/* EXISTING achievement preview */}
+            {existingAchievements.map((file, index) => (
+              <div
+                key={file.id ?? index} // fallback ke index jika file.id null/undefined
+                className="flex items-center justify-between bg-gray-100 p-2 rounded">
+                <a
+                  href={file.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm underline text-blue-600">
+                  {getOriginalFileName(file.name)}
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => handleRemoveExistingAchievement(index)}
+                  className="text-red-500 text-xs">
+                  Remove
+                </button>
+              </div>
+            ))}
           </div>
         </div>
         {/* Notes */}
