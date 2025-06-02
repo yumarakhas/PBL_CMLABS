@@ -47,6 +47,7 @@ function EmployeeAvatar({ src, alt }: AvatarProps) {
 
 type AchievementType = {
   file_path?: string;
+  original_filename?: string;
 };
 
 type EmployeeType = {
@@ -129,11 +130,13 @@ export default function EmployeeDatabasetPage() {
       const res = await getEmployees();
       const employees = res.data.map((emp: any) => ({
         ...emp,
-        Achievements:
-          typeof emp.Achievements === "string"
-            ? JSON.parse(emp.Achievements)
-            : emp.Achievements,
+        Achievements: Array.isArray(emp.achievements)
+          ? emp.achievements
+          : typeof emp.achievements === "string"
+          ? JSON.parse(emp.achievements)
+          : [],
       }));
+
       const currentDate = new Date();
 
       const activeCount = employees.filter((emp: any) => {
@@ -204,6 +207,12 @@ export default function EmployeeDatabasetPage() {
     });
     saveAs(dataBlob, fileName);
   };
+
+  function getOriginalFileName(pathOrName?: string) {
+    if (!pathOrName || typeof pathOrName !== "string")
+      return "Unnamed Achievement";
+    return pathOrName.split("/").pop() ?? "Unnamed Achievement";
+  }
 
   useEffect(() => {
     setTitle("Employee Database");
@@ -628,21 +637,30 @@ export default function EmployeeDatabasetPage() {
 
               <div className="border rounded-md p-4 mb-4">
                 <h4 className="font-semibold mb-3">Achievements</h4>
-                {selectedEmployee.Achievements &&
+                {selectedEmployee?.Achievements &&
                 selectedEmployee.Achievements.length > 0 ? (
-                  <ul className="list-disc list-inside space-y-1">
-                    {selectedEmployee.Achievements.map((achievement, index) => (
-                      <li key={index} className="font-medium">
-                        <a
-                          href={`${process.env.NEXT_PUBLIC_API_URL}/storage/${achievement.file_path}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline">
-                          {achievement.file_path?.split("/").pop() ??
-                            "Unnamed Achievement"}
-                        </a>
-                      </li>
-                    ))}
+                  <ul className="list-disc list-inside">
+                    {selectedEmployee?.Achievements?.map(
+                      (achievement, index) => {
+                        if (!achievement.file_path) return null;
+
+                        const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}/storage/${achievement.file_path}`;
+                        const fileName =
+                          achievement.original_filename ?? "Unnamed File";
+
+                        return (
+                          <li key={index}>
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 underline">
+                              {fileName}
+                            </a>
+                          </li>
+                        );
+                      }
+                    )}
                   </ul>
                 ) : (
                   <p className="text-gray-500">No achievements available</p>

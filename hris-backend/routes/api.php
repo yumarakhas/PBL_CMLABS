@@ -44,6 +44,8 @@ Route::prefix('employee')->group(function () {
     Route::delete('/{id}', [EmployeeController::class, 'destroy']);
 });
 
+Route::delete('/employee/achievement/{id}', [EmployeeController::class, 'removeAchievement']);
+
 Route::prefix('letters')->group(function () {
     Route::get('/', [LettersController::class, 'index']);
     Route::post('/', [LettersController::class, 'store']);

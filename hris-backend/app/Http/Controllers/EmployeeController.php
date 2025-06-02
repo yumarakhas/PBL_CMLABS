@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Models\Achievement;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeController extends Controller
 {
@@ -17,7 +18,7 @@ class EmployeeController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Employee::query();
+        $query = Employee::with('achievements');
 
         if ($request->has('status')) {
             $query->whereIn('status', $request->input('status'));
@@ -35,7 +36,19 @@ class EmployeeController extends Controller
             $query->whereIn('branch', $request->input('branch'));
         }
 
-        return response()->json($query->get());
+        return response()->json($query->get()->map(function ($emp) {
+            return [
+                ...$emp->toArray(),
+                'photo_url' => asset('storage/' . $emp->photo),
+                'Achievements' => $emp->achievements,
+                'achievement_files' => $emp->achievements->map(function ($ach) {
+                    return [
+                        'name' => $ach->original_filename ?? basename($ach->file_path),
+                        'url' => asset('storage/' . $ach->file_path),
+                    ];
+                }),
+            ];
+        }));
     }
 
 
@@ -79,11 +92,11 @@ class EmployeeController extends Controller
 
         $employee = Employee::create($validated);
 
-        $achievements = $request->input('Achievements');
+        // $achievements = $request->input('Achievements');
 
-        $achievements = $request->allFiles()['Achievements'] ?? [];
+        $achievementFiles = $request->file('Achievements', []);
 
-        foreach ($achievements as $achievement) {
+        foreach ($achievementFiles as $achievement) {
             if (isset($achievement['file']) && $achievement['file']) {
                 $file = $achievement['file'];
                 $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
@@ -93,6 +106,7 @@ class EmployeeController extends Controller
                 Achievement::create([
                     'employee_id' => $employee->id,
                     'file_path' => $filePath,
+                    'original_filename' => $file->getClientOriginalName(),
                 ]);
             }
         }
@@ -150,11 +164,9 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
-        $employee->achievements()->delete();
+        $achievementFiles = $request->file('Achievements', []);
 
-        $achievements = $request->allFiles()['Achievements'] ?? [];
-
-        foreach ($achievements as $achievement) {
+        foreach ($achievementFiles as $achievement) {
             if (isset($achievement['file']) && $achievement['file']) {
                 $file = $achievement['file'];
                 $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
@@ -164,6 +176,7 @@ class EmployeeController extends Controller
                 Achievement::create([
                     'employee_id' => $employee->id,
                     'file_path' => $filePath,
+                    'original_filename' => $file->getClientOriginalName(),
                 ]);
             }
         }
@@ -183,7 +196,7 @@ class EmployeeController extends Controller
 
     public function show($id)
     {
-        $employee = Employee::find($id);
+        $employee = Employee::with('achievements')->find($id);
 
         if (!$employee) {
             return response()->json(['message' => 'Employee not found'], 404);
@@ -191,13 +204,28 @@ class EmployeeController extends Controller
 
         $employee->photo_url = asset('storage/' . $employee->photo);
 
-        $employee->achievement_files = $employee->Achievements->map(function ($achievement) {
+        $employee->achievement_files = $employee->achievements->map(function ($achievement) {
             return [
-                'name' => basename($achievement->file_path),
                 'url' => asset('storage/' . $achievement->file_path),
+                'original_filename' => $achievement->original_filename,
             ];
         });
 
+        unset($employee->achievements);
+
         return response()->json($employee);
+    }
+
+    public function removeAchievement($id)
+    {
+        $achievement = Achievement::findOrFail($id);
+
+        if ($achievement->file_path && Storage::disk('public')->exists($achievement->file_path)) {
+            Storage::disk('public')->delete($achievement->file_path);
+        }
+
+        $achievement->delete();
+
+        return response()->json(['message' => 'Achievement file deleted successfully.']);
     }
 }

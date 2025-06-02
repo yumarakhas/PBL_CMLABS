@@ -16,6 +16,7 @@ interface FileFromServer {
   id: number;
   name: string;
   url: string;
+  original_filename?: string;
 }
 
 export default function AddEmployeePage({
@@ -89,7 +90,7 @@ export default function AddEmployeePage({
       setStatus(initialData.Status || "");
       setNotes(initialData.Notes || "");
       setAchievements([]);
-      setExistingAchievements(initialData.Achievements || []);
+      setExistingAchievements(initialData?.achievement_files ?? []);
 
       if (initialData.photo_url) {
         setPhotoUrl(initialData.photo_url);
@@ -223,8 +224,51 @@ export default function AddEmployeePage({
     setAchievements((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleRemoveExistingAchievement = (index: number) => {
-    setExistingAchievements((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveExistingAchievement = async (index: number) => {
+    const achievementToRemove = existingAchievements[index];
+    const confirmDelete = window.confirm("Are you sure you want to delete this achievement?");
+
+    if (!confirmDelete) return;
+
+    try {
+      if (achievementToRemove.id) {
+        // Panggil API untuk hapus file
+        const res = await fetch(
+          `/api/employee/achievement/${achievementToRemove.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to delete achievement");
+        }
+      }
+
+      // Update state lokal untuk hilangkan dari UI
+      setExistingAchievements((prev) => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      console.error("Failed to delete achievement: ", err);
+      alert("Failed to delete achievement. Please try again.");
+    }
+  };
+
+  const getOriginalFileName = (file: FileFromServer): string => {
+    if (file.original_filename) return file.original_filename;
+
+    const fileNameWithTimestamp = file.name;
+    const parts = fileNameWithTimestamp.split("_");
+    if (parts.length < 2) return fileNameWithTimestamp;
+
+    const timestampPart = parts.pop();
+    const timestampMatch = timestampPart?.match(/^(\d+)\.(\w+)$/);
+
+    if (!timestampMatch) return fileNameWithTimestamp;
+
+    const extension = timestampMatch[2];
+    const originalName = parts.join("_");
+
+    return `${originalName}.${extension}`;
   };
 
   return (
@@ -578,17 +622,22 @@ export default function AddEmployeePage({
                 className="mt-2"
               />
             </div>
-
             {/* Preview for NEW Achievements */}
             <div className="grid grid-cols-2 gap-2">
-              {Achievements.map((file, index) => (
+              {Achievements.map((file, idx) => (
                 <div
-                  key={index}
+                  key={`${file.name}-${file.size}-${idx}`}
                   className="flex items-center justify-between bg-gray-100 p-2 rounded">
                   <span className="text-sm">{file.name}</span>
                   <button
                     type="button"
-                    onClick={() => handleRemoveAchievement(index)}
+                    onClick={() =>
+                      handleRemoveAchievement(
+                        Achievements.findIndex(
+                          (f) => f.name === file.name && f.size === file.size
+                        )
+                      )
+                    }
                     className="text-red-500 text-xs">
                     Remove
                   </button>
@@ -596,28 +645,26 @@ export default function AddEmployeePage({
               ))}
             </div>
 
-            {/* Preview for EXISTING Achievements (from server) */}
-            <div className="grid grid-cols-2 gap-2 mt-4">
-              {existingAchievements.map((file, index) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between bg-gray-100 p-2 rounded">
-                  <a
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm underline text-blue-600">
-                    {file.name}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveExistingAchievement(index)}
-                    className="text-red-500 text-xs">
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
+            {/* EXISTING achievement preview */}
+            {existingAchievements.map((file, index) => (
+              <div
+                key={file.id ?? index}
+                className="flex items-center justify-between bg-gray-100 p-2 rounded">
+                <a
+                  href={file.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm underline text-blue-600">
+                  {getOriginalFileName(file)}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveExistingAchievement(index)}
+                  className="text-red-500 text-xs">
+                  Remove
+                </button>
+              </div>
+            ))}
           </div>
         </div>
         {/* Notes */}
