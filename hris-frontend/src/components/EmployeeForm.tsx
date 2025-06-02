@@ -16,6 +16,7 @@ interface FileFromServer {
   id: number;
   name: string;
   url: string;
+  original_filename?: string;
 }
 
 export default function AddEmployeePage({
@@ -223,15 +224,43 @@ export default function AddEmployeePage({
     setAchievements((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleRemoveExistingAchievement = (index: number) => {
-    setExistingAchievements((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveExistingAchievement = async (index: number) => {
+    const achievementToRemove = existingAchievements[index];
+    const confirmDelete = window.confirm("Are you sure you want to delete this achievement?");
+
+    if (!confirmDelete) return;
+
+    try {
+      if (achievementToRemove.id) {
+        // Panggil API untuk hapus file
+        const res = await fetch(
+          `/api/employee/achievement/${achievementToRemove.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to delete achievement");
+        }
+      }
+
+      // Update state lokal untuk hilangkan dari UI
+      setExistingAchievements((prev) => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      console.error("Failed to delete achievement: ", err);
+      alert("Failed to delete achievement. Please try again.");
+    }
   };
 
-  const getOriginalFileName = (fileNameWithTimestamp: string) => {
-    const parts = fileNameWithTimestamp.split("_");
-    if (parts.length < 2) return fileNameWithTimestamp; // fallback kalau gak sesuai format
+  const getOriginalFileName = (file: FileFromServer): string => {
+    if (file.original_filename) return file.original_filename;
 
-    const timestampPart = parts.pop(); // ambil bagian timestamp.ext
+    const fileNameWithTimestamp = file.name;
+    const parts = fileNameWithTimestamp.split("_");
+    if (parts.length < 2) return fileNameWithTimestamp;
+
+    const timestampPart = parts.pop();
     const timestampMatch = timestampPart?.match(/^(\d+)\.(\w+)$/);
 
     if (!timestampMatch) return fileNameWithTimestamp;
@@ -619,16 +648,15 @@ export default function AddEmployeePage({
             {/* EXISTING achievement preview */}
             {existingAchievements.map((file, index) => (
               <div
-                key={file.id ?? index} // fallback ke index jika file.id null/undefined
+                key={file.id ?? index}
                 className="flex items-center justify-between bg-gray-100 p-2 rounded">
                 <a
                   href={file.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm underline text-blue-600">
-                  {getOriginalFileName(file.name)}
+                  {getOriginalFileName(file)}
                 </a>
-
                 <button
                   type="button"
                   onClick={() => handleRemoveExistingAchievement(index)}

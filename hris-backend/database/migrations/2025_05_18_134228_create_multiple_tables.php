@@ -48,11 +48,12 @@ return new class extends Migration
         Schema::create('achievements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
-            $table->string('file_path')->nullable(); // ← tambahkan ini
+            $table->string('file_path')->nullable(); 
+            $table->string('original_filename')->nullable()->after('file_path');
             $table->timestamps();
         });
 
-        Schema::create('company', function (Blueprint $table) {
+        Schema::create('companies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email');
@@ -62,7 +63,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('branch', function (Blueprint $table) {
+        Schema::create('branches', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->string('name');
@@ -72,7 +73,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('division', function (Blueprint $table) {
+        Schema::create('divisions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_id')->constrained()->onDelete('cascade');
             $table->string('name');
@@ -80,7 +81,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('position', function (Blueprint $table) {
+        Schema::create('positions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('division_id')->constrained()->onDelete('cascade');
             $table->string('name');
