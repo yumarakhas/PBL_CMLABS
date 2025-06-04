@@ -362,11 +362,11 @@ export default function EmployeeForm({
             )}
           </div>
           <div className="flex flex-col justify-center h-32">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload Photo
-            </label>
-            <label className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md cursor-pointer text-sm inline-block">
-              Upload Photo
+
+            <label className="block mb-1 font-medium">Photo Profile</label>
+
+            <label className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer text-sm inline-block">
+              {mode === "edit" ? "Edit Photo" : "Upload Photo"}
               <input
                 id="photo-input"
                 type="file"
@@ -375,14 +375,6 @@ export default function EmployeeForm({
                 className="hidden"
               />
             </label>
-            {(photo || photoUrl) && (
-              <button
-                type="button"
-                onClick={handleRemovePhoto}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm w-fit">
-                Remove Photo
-              </button>
-            )}
             {errors.Photo && (
               <p className="text-red-500 text-sm mt-2">{errors.Photo}</p>
             )}
