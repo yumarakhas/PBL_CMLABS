@@ -42,9 +42,8 @@ Route::prefix('employee')->group(function () {
     Route::post('/', [EmployeeController::class, 'store']);
     Route::put('/{id}', [EmployeeController::class, 'update']);
     Route::delete('/{id}', [EmployeeController::class, 'destroy']);
+    Route::delete('/achievements/{id}', [EmployeeController::class, 'removeAchievement']);
 });
-
-Route::delete('/employee/achievement/{id}', [EmployeeController::class, 'removeAchievement']);
 
 Route::prefix('letters')->group(function () {
     Route::get('/', [LettersController::class, 'index']);

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
-
+import { FileText, Eye } from "lucide-react";
 import { MdClose } from "react-icons/md";
 import {
   FiFilter,
@@ -639,29 +639,92 @@ export default function EmployeeDatabasetPage() {
                 <h4 className="font-semibold mb-3">Achievements</h4>
                 {selectedEmployee?.Achievements &&
                 selectedEmployee.Achievements.length > 0 ? (
-                  <ul className="list-disc list-inside">
-                    {selectedEmployee?.Achievements?.map(
-                      (achievement, index) => {
-                        if (!achievement.file_path) return null;
+                  <div className="space-y-3">
+                    {selectedEmployee.Achievements.map((achievement, index) => {
+                      if (!achievement.file_path) return null;
 
-                        const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}/storage/${achievement.file_path}`;
-                        const fileName =
-                          achievement.original_filename ?? "Unnamed File";
+                      const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}/storage/${achievement.file_path}`;
+                      const fileName =
+                        achievement.original_filename ?? "Unnamed File";
 
+                      const getFileIcon = (filename: string) => {
+                        const extension = filename
+                          .split(".")
+                          .pop()
+                          ?.toLowerCase();
                         return (
-                          <li key={index}>
-                            <a
-                              href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 underline">
-                              {fileName}
-                            </a>
-                          </li>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className={`h-6 w-6 ${
+                              extension === "pdf"
+                                ? "text-red-500"
+                                : "text-blue-500"
+                            }`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
                         );
-                      }
-                    )}
-                  </ul>
+                      };
+
+                      const openFile = () => {
+                        if (fileUrl) {
+                          window.open(fileUrl, "_blank", "noopener,noreferrer");
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between border rounded-md p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex-shrink-0">
+                              {getFileIcon(fileName)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 truncate">
+                                {fileName}
+                              </p>
+                              <span className="text-green-600 text-sm font-medium bg-green-100 px-2 py-0.5 rounded">
+                                Saved
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={openFile}
+                            className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            View
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <p className="text-gray-500">No achievements available</p>
                 )}
