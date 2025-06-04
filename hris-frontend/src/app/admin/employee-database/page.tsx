@@ -17,6 +17,13 @@ import { getEmployees, deleteEmployee } from "@/lib/services/employee";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+interface AchievementData {
+  id?: number;
+  file_path?: string;
+  original_filename?: string;
+  [key: string]: any;
+}
+
 type AvatarProps = {
   src?: string;
   alt: string;
@@ -128,14 +135,40 @@ export default function EmployeeDatabasetPage() {
   const fetchEmployees = async () => {
     try {
       const res = await getEmployees();
-      const employees = res.data.map((emp: any) => ({
-        ...emp,
-        Achievements: Array.isArray(emp.achievements)
-          ? emp.achievements
-          : typeof emp.achievements === "string"
-          ? JSON.parse(emp.achievements)
-          : [],
-      }));
+      const employees = res.data.map((emp: any) => {
+        let achievements: AchievementData[] = [];
+
+        // Handle berbagai format achievements dari backend
+        if (emp.achievements) {
+          if (Array.isArray(emp.achievements)) {
+            achievements = emp.achievements;
+          } else if (typeof emp.achievements === "string") {
+            try {
+              achievements = JSON.parse(emp.achievements);
+            } catch (e) {
+              console.warn(
+                "Failed to parse achievements for employee:",
+                emp.id,
+                e
+              );
+              achievements = [];
+            }
+          } else if (typeof emp.achievements === "object") {
+            achievements = [emp.achievements]; // Single object to array
+          }
+        }
+
+        const validAchievements = achievements.filter(
+          (achievement: AchievementData) =>
+            achievement &&
+            (achievement.file_path || achievement.original_filename)
+        );
+
+        return {
+          ...emp,
+          Achievements: validAchievements,
+        };
+      });
 
       const currentDate = new Date();
 
@@ -164,6 +197,16 @@ export default function EmployeeDatabasetPage() {
         Branch: branchCount,
         Division: divisionCount,
       }));
+
+      console.log("Fetched employees with achievements:", employees);
+      employees.forEach((emp: any) => {
+        if (emp.Achievements && emp.Achievements.length > 0) {
+          console.log(
+            `Employee ${emp.FirstName} has ${emp.Achievements.length} achievements:`,
+            emp.Achievements
+          );
+        }
+      });
     } catch (error) {
       console.error("Error fetching employees:", error);
     }
@@ -208,10 +251,32 @@ export default function EmployeeDatabasetPage() {
     saveAs(dataBlob, fileName);
   };
 
-  function getOriginalFileName(pathOrName?: string) {
-    if (!pathOrName || typeof pathOrName !== "string")
-      return "Unnamed Achievement";
-    return pathOrName.split("/").pop() ?? "Unnamed Achievement";
+  function getOriginalFileName(achievement: AchievementType) {
+    if (achievement.original_filename) {
+      return achievement.original_filename;
+    }
+
+    if (achievement.file_path) {
+      const fileName = achievement.file_path.split("/").pop();
+      return fileName || "Unnamed Achievement";
+    }
+
+    return "Unnamed Achievement";
+  }
+
+  function getFileUrl(achievement: AchievementType) {
+    if (!achievement.file_path) {
+      console.warn("No file_path found for achievement:", achievement);
+      return null;
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    const cleanPath = achievement.file_path.startsWith("/")
+      ? achievement.file_path.slice(1)
+      : achievement.file_path;
+
+    return `${baseUrl}/storage/${cleanPath}`;
   }
 
   useEffect(() => {
@@ -282,7 +347,7 @@ export default function EmployeeDatabasetPage() {
                   No.
                 </th>
                 <th className="px-4 py-2 text-center text-sm font-semibold text-white">
-                  Avatar
+                  Photo Profile
                 </th>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-white">
                   Name
@@ -635,18 +700,31 @@ export default function EmployeeDatabasetPage() {
                 </div>
               </div>
 
+              {/* Acievement */}
               <div className="border rounded-md p-4 mb-4">
-                <h4 className="font-semibold mb-3">Achievements</h4>
+                <h4 className="font-semibold mb-3">
+                  Achievements{" "}
+                  {selectedEmployee?.Achievements?.length > 0 &&
+                    `(${selectedEmployee.Achievements.length})`}
+                </h4>
+
                 {selectedEmployee?.Achievements &&
                 selectedEmployee.Achievements.length > 0 ? (
                   <div className="space-y-3">
                     {selectedEmployee.Achievements.map((achievement, index) => {
-                      if (!achievement.file_path) return null;
+                      const fileName = getOriginalFileName(achievement);
+                      const fileUrl = getFileUrl(achievement);
 
-                      const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}/storage/${achievement.file_path}`;
-                      const fileName =
-                        achievement.original_filename ?? "Unnamed File";
+                      // Skip if no file path
+                      if (!achievement.file_path) {
+                        console.warn(
+                          "Skipping achievement without file_path:",
+                          achievement
+                        );
+                        return null;
+                      }
 
+                      // File icon function
                       const getFileIcon = (filename: string) => {
                         const extension = filename
                           .split(".")
@@ -673,22 +751,38 @@ export default function EmployeeDatabasetPage() {
                         );
                       };
 
+                      // Open file function with enhanced error handling
                       const openFile = () => {
-                        if (fileUrl) {
+                        if (!fileUrl) {
+                          console.error(
+                            "No file URL available for achievement:",
+                            achievement
+                          );
+                          alert("File not available for viewing");
+                          return;
+                        }
+
+                        try {
+                          console.log("Opening file:", fileUrl);
                           window.open(fileUrl, "_blank", "noopener,noreferrer");
+                        } catch (error) {
+                          console.error("Error opening file:", error);
+                          alert("Error occurred while trying to open the file");
                         }
                       };
 
                       return (
                         <div
-                          key={index}
+                          key={achievement.id || `achievement-${index}`}
                           className="flex items-center justify-between border rounded-md p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
                           <div className="flex items-center space-x-3">
                             <div className="flex-shrink-0">
                               {getFileIcon(fileName)}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 truncate">
+                              <p
+                                className="font-medium text-gray-900 truncate"
+                                title={fileName}>
                                 {fileName}
                               </p>
                               <span className="text-green-600 text-sm font-medium bg-green-100 px-2 py-0.5 rounded">
@@ -696,10 +790,12 @@ export default function EmployeeDatabasetPage() {
                               </span>
                             </div>
                           </div>
+
                           <button
                             type="button"
                             onClick={openFile}
-                            className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                            title="View file">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="w-4 h-4 mr-1"
@@ -726,10 +822,26 @@ export default function EmployeeDatabasetPage() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No achievements available</p>
+                  <div className="text-center py-8">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 text-gray-400 mx-auto mb-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <p className="text-gray-500">No achievements available</p>
+                  </div>
                 )}
               </div>
 
+              {/* Notes */}
               <div className="border rounded-md p-4 mb-4">
                 <h4 className="font-semibold mb-3">Notes</h4>
                 {selectedEmployee.Notes &&
