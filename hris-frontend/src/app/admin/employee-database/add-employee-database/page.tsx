@@ -21,14 +21,26 @@ export default function AddEmployeePage() {
     try {
       const data = buildEmployeeFormData(formDataObj);
 
+      console.log("Sending data to server...");
       for (const pair of data.entries()) {
         console.log(pair[0], pair[1]);
       }
 
-      await createEmployee(data);
+      const response = await createEmployee(data);
+      console.log("Success response:", response.data);
       router.push("/admin/employee-database");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to add employee:", error);
+
+      // Debug response error
+      if (error.response) {
+        console.error("Error status:", error.response.status);
+        console.error("Error data:", error.response.data);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+      } else {
+        console.error("Error message:", error.message);
+      }
     }
   };
 
