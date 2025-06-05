@@ -9,14 +9,12 @@ export default function Billing() {
   const plan = searchParams.get("plan");
   const price = parseInt(searchParams.get("price") ?? "0");
 
-  // Billing period options
   const billingPeriods = [
     { label: "1 Bulan", value: "1", months: 1 },
     { label: "6 Bulan", value: "6", months: 6 },
     { label: "12 Bulan", value: "12", months: 12 },
   ];
 
-  // Employee count options
   const employeeOptions = [
     { label: "< 50", value: "<50", count: 50 },
     { label: "51 - 100", value: "51-100", count: 100 },
@@ -24,12 +22,13 @@ export default function Billing() {
     { label: "> 150", value: ">150", count: 151 },
   ];
 
+  const [companyName, setCompanyName] = useState("");
+  const [position, setPosition] = useState("");
   const [billingPeriod, setBillingPeriod] = useState("1");
   const [employeeRange, setEmployeeRange] = useState("<50");
-  const [paymentType, setPaymentType] = useState("lunas"); // lunas or payg
+  const [paymentType, setPaymentType] = useState("lunas");
   const [employees, setEmployees] = useState(1);
 
-  // Calculate price per user (dummy logic, adjust as needed)
   const pricePerUser = price;
   const months = parseInt(billingPeriod);
   const total =
@@ -39,7 +38,7 @@ export default function Billing() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-10 flex flex-col md:flex-row gap-8 font-sans">
-      {/* Left Side */}
+      {/* Left Side - Form */}
       <div className="bg-white rounded-xl shadow-lg p-6 flex-1">
         <h2 className="text-2xl font-bold text-black mb-1">{plan}</h2>
         <p className="text-sm font-medium text-[#595959] mb-4">
@@ -52,28 +51,40 @@ export default function Billing() {
           Change plan
         </button>
 
-        {/* Billing Period */}
-        <h3 className="text-sm font-semibold mb-2 text-black">Billing Period</h3>
-        <select
-          className="w-full mb-6 border rounded px-3 py-2"
-          value={billingPeriod}
-          onChange={e => setBillingPeriod(e.target.value)}
-        >
-          {billingPeriods.map(opt => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        {/* Company Name */}
+        <label className="block text-sm font-semibold text-black mb-1">
+          Nama Perusahaan
+        </label>
+        <input
+          type="text"
+          value={companyName}
+          onChange={(e) => setCompanyName(e.target.value)}
+          className="w-full mb-4 border rounded px-3 py-2"
+          placeholder="PT Contoh Sejahtera"
+        />
 
-        {/* Employee Range */}
-        <h3 className="text-sm font-semibold mb-2 text-black">Size Matters</h3>
+        {/* Position */}
+        <label className="block text-sm font-semibold text-black mb-1">
+          Posisi / Jabatan
+        </label>
+        <input
+          type="text"
+          value={position}
+          onChange={(e) => setPosition(e.target.value)}
+          className="w-full mb-4 border rounded px-3 py-2"
+          placeholder="HR Manager"
+        />
+
+        {/* Billing Period */}
+        <label className="block text-sm font-semibold text-black mb-1">
+          Billing Period
+        </label>
         <select
-          className="w-full mb-6 border rounded px-3 py-2"
-          value={employeeRange}
-          onChange={e => setEmployeeRange(e.target.value)}
+          className="w-full mb-4 border rounded px-3 py-2"
+          value={billingPeriod}
+          onChange={(e) => setBillingPeriod(e.target.value)}
         >
-          {employeeOptions.map(opt => (
+          {billingPeriods.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
@@ -81,9 +92,9 @@ export default function Billing() {
         </select>
 
         {/* Number of Employees */}
-        <h3 className="text-sm font-semibold mb-2 text-black">
+        <label className="block text-sm font-semibold text-black mb-1">
           Number of Employees
-        </h3>
+        </label>
         <div className="flex items-center gap-4 mb-6 text-[#595959]">
           <button
             onClick={() => setEmployees(Math.max(1, employees - 1))}
@@ -100,10 +111,9 @@ export default function Billing() {
                 setEmployees(Math.max(1, value));
               }
             }}
-            className="w-16 text-center px-2 py-1 rounded border border-gray-300 text-black appearance-none [appearance:textfield]"
+            className="w-16 text-center px-2 py-1 rounded border border-gray-300 text-black"
             min={1}
           />
-
           <button
             onClick={() => setEmployees(employees + 1)}
             className="px-2 py-1 bg-gray-300 rounded text-black"
@@ -120,15 +130,18 @@ export default function Billing() {
                 `&employees=${encodeURIComponent(employees)}` +
                 `&total=${encodeURIComponent(total)}` +
                 `&paymentType=${encodeURIComponent(paymentType)}` +
-                `&employeeRange=${encodeURIComponent(employeeRange)}`
+                `&employeeRange=${encodeURIComponent(employeeRange)}` +
+                `&companyName=${encodeURIComponent(companyName)}` +
+                `&position=${encodeURIComponent(position)}`
             )
           }
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition cursor-pointer">
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition cursor-pointer"
+        >
           Continue to Payment
         </button>
       </div>
 
-      {/* Right Side - Summary */}
+      {/* Right Side - Order Summary */}
       <div className="bg-blue-100 rounded-xl shadow-lg p-6 w-full md:w-[400px]">
         <h2 className="text-xl font-bold mb-4 text-black">Order Summary</h2>
         <ul className="text-sm text-black mb-4 space-y-2">
@@ -137,23 +150,25 @@ export default function Billing() {
             <span>{plan}</span>
           </li>
           <li className="flex justify-between">
+            <span>Nama Perusahaan</span>
+            <span>{companyName || "-"}</span>
+          </li>
+          <li className="flex justify-between">
+            <span>Posisi / Jabatan</span>
+            <span>{position || "-"}</span>
+          </li>
+          <li className="flex justify-between">
             <span>Billing Period</span>
             <span>
-              {
-                billingPeriods.find(opt => opt.value === billingPeriod)?.label
-              }
+              {billingPeriods.find((opt) => opt.value === billingPeriod)?.label}
             </span>
           </li>
           <li className="flex justify-between">
-            <span>Size Matters</span>
-            <span>{employeeRange}</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Number of Employees</span>
+            <span>Jumlah Karyawan</span>
             <span>{employees}</span>
           </li>
           <li className="flex justify-between">
-            <span>Price per User</span>
+            <span>Harga per User</span>
             <span>Rp {pricePerUser.toLocaleString()}</span>
           </li>
         </ul>
@@ -164,7 +179,8 @@ export default function Billing() {
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span>
-              Rp {paymentType === "lunas"
+              Rp{" "}
+              {paymentType === "lunas"
                 ? (pricePerUser * employees * months).toLocaleString()
                 : (pricePerUser * employees).toLocaleString()}
             </span>
@@ -179,8 +195,6 @@ export default function Billing() {
             <span>Rp {total.toLocaleString()}</span>
           </div>
         </div>
-
-        
       </div>
     </div>
   );

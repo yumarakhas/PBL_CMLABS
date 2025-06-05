@@ -5,26 +5,20 @@ import { useRouter, usePathname } from 'next/navigation';
 
 const seatPlans = [
   {
-    title: "Free",
-    price: "Rp 0",
-    unit: "/14 days",
-    description: "This package for unlimited employees",
-  },
-  {
-    title: "Standard",
-    price: "Rp 6.533",
+    title: "Startup",
+    price: "Rp 6.900",
     unit: "/user/month",
     description: "This package for 1-50 employees",
   },
   {
-    title: "Premium",
-    price: "Rp 15.867",
+    title: "Growth",
+    price: "Rp 12.900",
     unit: "/user/month",
     description: "This package for 51-100 employees",
   },
   {
-    title: "Ultra",
-    price: "Rp 19.867",
+    title: "Enterprise",
+    price: "Rp 16.900",
     unit: "/user/month",
     description: "This package for more than 100 employees",
   },
@@ -72,7 +66,7 @@ export default function SeatPlanPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 px-2 md:px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 px-2 md:px-4">
           {seatPlans.map((plan, idx) => (
             <div
               key={idx}
