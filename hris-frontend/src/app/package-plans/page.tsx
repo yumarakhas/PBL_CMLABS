@@ -5,18 +5,6 @@ import React from 'react';
 
 const packagePlans = [
   {
-    title: "Free",
-    subtitle: "Best for growing business",
-    features: [
-      "GPS-based attendance validation",
-      "Employee data management",
-      "Leave & time-off requests",
-      "Overtime management (government regulations)",
-      "Fixed work schedule management",
-      "Automatic tax calculation"
-    ]
-  },
-  {
     title: "Standard",
     subtitle: "Best for growing business",
     features: [
@@ -98,18 +86,19 @@ export default function PackagePlanPage() {
 
       {/* Cards */}
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {packagePlans.map((plan, idx) => (
             <div
               key={idx}
               className="bg-white rounded-xl shadow-md p-8 flex flex-col transition-all duration-300 ease-in-out transform hover:scale-[1.03] hover:shadow-xl text-sm"
             >
-              <h3 className="text-2xl font-semibold mb-6 text-blue-700">{plan.title}</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-blue-700">{plan.title}</h3>
+              <div className="h-[1px] bg-gray-500 mb-5 w-full"></div>
+
               <ul className="space-y-3 mb-8 flex-grow">
                 {plan.features.map((feature, fidx) => (
                   <li key={fidx} className="flex items-center text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     {feature}
@@ -126,6 +115,6 @@ export default function PackagePlanPage() {
           ))}
         </div>
       </div>
-    </div>
+     </div>
   );
-}
+} 

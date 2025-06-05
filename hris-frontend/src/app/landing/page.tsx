@@ -108,6 +108,7 @@ export default function LandingPage() {
               >
 
               <h3 className="text-2xl font-semibold mb-6 text-blue-700">{plan.title}</h3>
+              <div className="h-[1px] bg-gray-500 mb-5 w-full"></div>
               <ul className="space-y-3 mb-8 flex-grow">
                 {plan.features.map((feature, fidx) => (
                   <li key={fidx} className="flex items-center text-gray-700">
@@ -126,7 +127,11 @@ export default function LandingPage() {
                 ))}
               </ul>
               <button
-                onClick={() => router.push("/seat-plans")}
+                onClick={() =>
+                  plan.title === "Free"
+                    ? router.push("/billing?plan=Free&price=0")
+                    : router.push("/seat-plans")
+                }
                 className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-[#1E3A5F] transition cursor-pointer"
               >
                 Select a Package →
