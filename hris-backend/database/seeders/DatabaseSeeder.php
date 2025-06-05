@@ -22,7 +22,11 @@ class DatabaseSeeder extends Seeder
         
         $this->call([
             LetterFormatsTableSeeder::class,
+            CompaniesSeeder::class,
             UserSeeder::class,
+            // BranchesSeeder::class,
+            // DivisionsSeeder::class,
+            // PositionsSeeder::class,
         ]);
     }
 }
