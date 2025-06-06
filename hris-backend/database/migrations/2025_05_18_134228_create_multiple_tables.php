@@ -187,6 +187,32 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
+
+        // Tabel Package Plans
+        Schema::create('package_plans', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->string('subtitle')->nullable();
+            $table->json('features');
+            $table->unsignedBigInteger('price');
+            $table->timestamps();
+        });
+
+        // Tabel Checkout
+        Schema::create('checkouts', function (Blueprint $table) {
+            $table->id();
+            $table->string('plan');
+            $table->unsignedBigInteger('company_id');
+            $table->integer('branches')->default(0);
+            $table->integer('addon_employees')->default(0);
+            $table->bigInteger('subtotal');
+            $table->bigInteger('tax');
+            $table->bigInteger('total');
+            $table->string('status')->default('pending'); // pending, paid, failed, etc
+            $table->timestamps();
+
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+        });
     }
 
     /**
@@ -209,5 +235,7 @@ return new class extends Migration
         Schema::dropIfExists('branch');
         Schema::dropIfExists('division');
         Schema::dropIfExists('position');
+        Schema::dropIfExists('package_plans');
+        Schema::dropIfExists('checkouts');
     }
 };

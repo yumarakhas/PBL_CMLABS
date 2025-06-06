@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        
+
         $this->call([
             LetterFormatsTableSeeder::class,
             CompaniesSeeder::class,
@@ -28,5 +28,7 @@ class DatabaseSeeder extends Seeder
             // DivisionsSeeder::class,
             // PositionsSeeder::class,
         ]);
+        $this->call(PackagePlanSeeder::class);
+
     }
 }
