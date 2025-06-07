@@ -7,7 +7,19 @@ use App\Http\Controllers\CheckClockController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LettersController;
 use App\Http\Controllers\LetterFormatsController;
+use App\Http\Controllers\XenditController;
+use Illuminate\Support\Facades\DB;
 use App\Models\Letter_formats as ModelsLetter_formats;
+use App\Http\Controllers\PackagePlanController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CheckoutController;
+
+Route::get('/package-plans', [PackagePlanController::class, 'index']);
+
+Route::get('companies', [CompanyController::class, 'index']);
+Route::get('/company', [CompanyController::class, 'show']);
+
+Route::apiResource('checkouts', CheckoutController::class);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -34,9 +46,11 @@ Route::prefix('check-clocks')->group(function () {
 
 Route::prefix('employee')->group(function () {
     Route::get('/', [EmployeeController::class, 'index']);
+    Route::get('/{id}', [EmployeeController::class, 'show']);
     Route::post('/', [EmployeeController::class, 'store']);
     Route::put('/{id}', [EmployeeController::class, 'update']);
     Route::delete('/{id}', [EmployeeController::class, 'destroy']);
+    Route::delete('/achievements/{id}', [EmployeeController::class, 'removeAchievement']);
 });
 
 Route::prefix('letters')->group(function () {
@@ -51,4 +65,18 @@ Route::prefix('letterFormats')->group(function () {
     Route::post('/', [LetterFormatsController::class, 'store']);
     Route::put('/{id}', [LetterFormatsController::class, 'update']);
     Route::delete('/{id}', [LetterFormatsController::class, 'destroy']);
+});
+
+Route::get('/company', function () {
+    $company = DB::table('companies')->first([
+        'name',
+        'email',
+        'head_office_phone',
+    ]);
+
+    return response()->json($company);
+});
+
+Route::get('/test', function () {
+    return response()->json(['message' => 'API works!']);
 });

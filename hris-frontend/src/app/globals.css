@@ -22,3 +22,16 @@
 body {
   @apply bg-gray-100;
 }
+
+/* Hapus spinner input number untuk Webkit (Chrome, Safari, Edge) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hapus spinner input number untuk Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+

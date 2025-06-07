@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Letters;
+use App\Models\User;
+use App\Http\Requests\StoreLetterRequest;
 
 class LettersController extends Controller
 {
@@ -16,13 +18,27 @@ class LettersController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'letter_format_id' => 'required|exists:letter_formats,id',
             'user_id' => 'required|exists:users,id',
-            'letter_format_id' => 'required|exists:letter_format,id' ,
-            'name'=> 'required|string',
+            'resignation_date' => 'nullable|date',
+            'reason_resign' => 'nullable|string',
+            'additional_notes' => 'nullable|string',
+            'current_division' => 'nullable|string',
+            'requested_division' => 'nullable|string',
+            'reason_transfer' => 'nullable|string',
+            'current_salary' => 'nullable|integer',
+            'requested_salary' => 'nullable|integer',
+            'reason_salary' => 'nullable|string',
+            'leave_start' => 'nullable|date',
+            'return_to_work' => 'nullable|date',
+            'reason_for_leave' => 'nullable|string',
+            'is_sent' => 'boolean',
+            'is_approval' => 'boolean',
         ]);
 
-        $letters = Letters::create($validated);
-        return response()->json($letters,201);
+        $letter = Letters::create($validated);
+        return response()->json($letter, 201);
+
     }
 
     public function show(string $id)
@@ -32,9 +48,9 @@ class LettersController extends Controller
 
     public function update(Request $request, string $id)
     {
-        $letters = Letters::findOrFail($id);
-        $letters->update($request->all());
-        return response()->json($letters, 200);
+        $letter = Letters::findOrFail($id);
+        $letter->update($request->all());
+        return response()->json($letter, 200);
     }
 
     public function destroy(string $id)
