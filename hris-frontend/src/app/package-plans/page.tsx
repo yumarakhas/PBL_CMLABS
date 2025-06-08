@@ -3,51 +3,6 @@
 import { useRouter, usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-const packagePlans = [
-	{
-		title: 'Free Trial',
-		subtitle: 'Try before you buy — full features for 2 weeks',
-		features: ['14 days access', 'Up to 25 employees', 'Head Office only'],
-		price: 0,
-	},
-	{
-		title: 'Starter',
-		subtitle: 'Ideal for small businesses starting their journey',
-		features: ['1 month access', 'Up to 50 employees', 'Head Office only'],
-		price: 500000,
-	},
-	{
-		title: 'Growth',
-		subtitle: 'Perfect for expanding companies with multiple locations',
-		features: [
-			'3 month access',
-			'Up to 250 employees',
-			'Head Office with 2 branch offices',
-		],
-		price: 1800000,
-	},
-	{
-		title: 'Pro',
-		subtitle: 'Advanced features for mid-sized enterprises',
-		features: [
-			'6 month access',
-			'Up to 500 employees',
-			'Head Office with 3 branch offices',
-		],
-		price: 3600000,
-	},
-	{
-		title: 'Enterprise',
-		subtitle: 'Comprehensive solution for large-scale organizations',
-		features: [
-			'12 month access',
-			'Up to 1000 employees',
-			'Head Office with 4 branch offices',
-		],
-		price: 7200000,
-	},
-];
-
 export default function PackagePlanPage() {
 	const router = useRouter();
 	const pathname = usePathname();
