@@ -20,3 +20,5 @@ export const deleteEmployee = async (id: number) => {
 export const removeAchievement = async (id: number) => {
   return await api.delete(`/employee/achievements/${id}`);
 };
+
+

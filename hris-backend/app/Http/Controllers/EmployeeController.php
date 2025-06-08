@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Achievement;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Branch;
+use App\Models\Division;
+use App\Models\Position;
 
 class EmployeeController extends Controller
 {
@@ -25,15 +28,15 @@ class EmployeeController extends Controller
         }
 
         if ($request->has('division')) {
-            $query->whereIn('division', $request->input('division'));
+            $query->whereIn('Division_id', $request->input('division')); // pastikan nama field sesuai
         }
 
         if ($request->has('position')) {
-            $query->whereIn('position', $request->input('position'));
+            $query->whereIn('Position_id', $request->input('position'));
         }
 
         if ($request->has('branch')) {
-            $query->whereIn('branch', $request->input('branch'));
+            $query->whereIn('Branch_id', $request->input('branch'));
         }
 
         return response()->json($query->get()->map(function ($emp) {
@@ -47,10 +50,12 @@ class EmployeeController extends Controller
                         'url' => asset('storage/' . $ach->file_path),
                     ];
                 }),
+                'Branch' => $emp->branch?->name,
+                'Division' => $emp->division?->name,
+                'Position' => $emp->position?->name,
             ];
         }));
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -64,9 +69,9 @@ class EmployeeController extends Controller
             'Gender' => 'required|string|in:Male,Female',
             'Address' => 'required|string',
             'PhoneNumber' => 'required|string',
-            'Branch' => 'required|string',
-            'Position' => 'required|string',
-            'Division' => 'required|string',
+            'Branch_id' => 'required|integer|exists:branches,id',
+            'Division_id' => 'required|integer|exists:divisions,id',
+            'Position_id' => 'required|integer|exists:positions,id',
             'Status' => 'required|string|in:Aktif,Non Aktif',
             'NIK' => 'required|string',
             'LastEducation' => 'required|string',
@@ -84,6 +89,37 @@ class EmployeeController extends Controller
         ]);
 
         $validated['user_id'] = 1;
+        $validated['Company_id'] = 1;
+        // ubah kalau sudah login
+        // $validated['user_id'] = auth()->id(); // atau Auth::user()->id
+        // $validated['Company_id'] = auth()->user()->company_id;
+
+        $branch = Branch::find($validated['Branch_id']);
+        $division = Division::find($validated['Division_id']);
+        $position = Position::find($validated['Position_id']);
+
+        // Validasi hubungan antar entitas
+        if (!$branch || $branch->company_id != $validated['Company_id']) {
+            return response()->json(['message' => 'Branch tidak sesuai dengan Company'], 422);
+        }
+
+        if (!$division || $division->branch_id != $validated['Branch_id']) {
+            return response()->json(['message' => 'Division tidak sesuai dengan Branch'], 422);
+        }
+
+        if (!$position || $position->division_id != $validated['Division_id']) {
+            return response()->json(['message' => 'Position tidak sesuai dengan Division'], 422);
+        }
+
+        $prefix = str_pad($validated['Company_id'], 2, '0', STR_PAD_LEFT)
+            . str_pad($validated['Branch_id'], 2, '0', STR_PAD_LEFT)
+            . str_pad($validated['Division_id'], 2, '0', STR_PAD_LEFT)
+            . str_pad($validated['Position_id'], 2, '0', STR_PAD_LEFT);
+
+        $count = Employee::where('EmployeeID', 'like', $prefix . '%')->count();
+        $sequence = str_pad($count + 1, 4, '0', STR_PAD_LEFT);
+
+        $validated['EmployeeID'] = $prefix . $sequence;
 
         if ($request->hasFile('photo')) {
             $photo = $request->file('photo');
@@ -131,9 +167,9 @@ class EmployeeController extends Controller
             'Gender' => 'required|string|in:Male,Female',
             'Address' => 'required|string',
             'PhoneNumber' => 'required|string',
-            'Branch' => 'required|string',
-            'Position' => 'required|string',
-            'Division' => 'required|string',
+            'Branch_id' => 'required|integer|exists:branches,id',
+            'Division_id' => 'required|integer|exists:divisions,id',
+            'Position_id' => 'required|integer|exists:positions,id',
             'Status' => 'required|string|in:Aktif,Non Aktif',
             'NIK' => 'required|string',
             'LastEducation' => 'required|string',
@@ -152,6 +188,27 @@ class EmployeeController extends Controller
         ]);
 
         $validated['user_id'] = 1;
+        $validated['Company_id'] = 1;
+        // ubah kalau sudah login
+        // $validated['user_id'] = auth()->id(); // atau Auth::user()->id
+        // $validated['Company_id'] = auth()->user()->company_id;
+
+        $branch = Branch::find($validated['Branch_id']);
+        $division = Division::find($validated['Division_id']);
+        $position = Position::find($validated['Position_id']);
+
+        // Validasi hubungan antar entitas
+        if (!$branch || $branch->company_id != $validated['Company_id']) {
+            return response()->json(['message' => 'Branch tidak sesuai dengan Company'], 422);
+        }
+
+        if (!$division || $division->branch_id != $validated['Branch_id']) {
+            return response()->json(['message' => 'Division tidak sesuai dengan Branch'], 422);
+        }
+
+        if (!$position || $position->division_id != $validated['Division_id']) {
+            return response()->json(['message' => 'Position tidak sesuai dengan Division'], 422);
+        }
 
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
@@ -164,7 +221,7 @@ class EmployeeController extends Controller
             $photoPath = $photo->storeAs('employee_photos', $filename, 'public');
             $validated['photo'] = $photoPath;
         } else {
-             unset($validated['photo']);
+            unset($validated['photo']);
         }
 
         $employee->update($validated);
@@ -244,6 +301,7 @@ class EmployeeController extends Controller
     public function show($id)
     {
         $employee = Employee::with('achievements')->find($id);
+        $employee = Employee::with(['branch', 'division', 'position'])->findOrFail($id);
 
         if (!$employee) {
             return response()->json(['message' => 'Employee not found'], 404);

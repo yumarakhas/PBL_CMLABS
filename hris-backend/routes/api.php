@@ -44,6 +44,8 @@ Route::prefix('check-clocks')->group(function () {
     Route::get('/report', [CheckClockController::class, 'report']);
 });
 
+Route::post('/companies', [CompanyController::class, 'store']);
+
 Route::prefix('employee')->group(function () {
     Route::get('/', [EmployeeController::class, 'index']);
     Route::get('/{id}', [EmployeeController::class, 'show']);

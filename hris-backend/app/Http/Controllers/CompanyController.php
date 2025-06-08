@@ -2,14 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Company;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
 {
-    public function index()
+    public function store(Request $request)
     {
-        // Mengambil semua data perusahaan
-        return response()->json(Company::all());
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:companies,email',
+            'head_office_phone' => 'required|string|max:20',
+            'head_office_phone_backup' => 'nullable|string|max:20',
+            'head_office_address' => 'required|string|max:500',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $company = Company::create($validator->validated());
+
+        return response()->json([
+            'message' => 'Company created successfully',
+            'data' => $company
+        ], 201);
     }
 }
+
