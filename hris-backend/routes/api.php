@@ -8,8 +8,18 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LettersController;
 use App\Http\Controllers\LetterFormatsController;
 use App\Http\Controllers\XenditController;
+use Illuminate\Support\Facades\DB;
 use App\Models\Letter_formats as ModelsLetter_formats;
+use App\Http\Controllers\PackagePlanController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CheckoutController;
+
+Route::get('/package-plans', [PackagePlanController::class, 'index']);
+
+Route::get('companies', [CompanyController::class, 'index']);
+Route::get('/company', [CompanyController::class, 'show']);
+
+Route::apiResource('checkouts', CheckoutController::class);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -17,10 +27,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Route::apiResource('pegawai', InformasiPegawaiController::class);
 // Route::get('/pegawai', [App\Http\Controllers\InformasiPegawaiController::class]);
-
-Route::post('/create-invoice', [XenditController::class, 'createInvoice']);
-
-Route::get('/position-branch-company', [App\Http\Controllers\DropDownController::class, 'getPositionBranchCompany']);
 
 // API Check Clock
 Route::prefix('check-clock-settings')->group(function () {
@@ -61,6 +67,16 @@ Route::prefix('letterFormats')->group(function () {
     Route::post('/', [LetterFormatsController::class, 'store']);
     Route::put('/{id}', [LetterFormatsController::class, 'update']);
     Route::delete('/{id}', [LetterFormatsController::class, 'destroy']);
+});
+
+Route::get('/company', function () {
+    $company = DB::table('companies')->first([
+        'name',
+        'email',
+        'head_office_phone',
+    ]);
+
+    return response()->json($company);
 });
 
 Route::get('/test', function () {
