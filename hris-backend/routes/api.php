@@ -9,6 +9,7 @@ use App\Http\Controllers\LettersController;
 use App\Http\Controllers\LetterFormatsController;
 use App\Http\Controllers\XenditController;
 use App\Models\Letter_formats as ModelsLetter_formats;
+use App\Http\Controllers\CompanyController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -19,6 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/create-invoice', [XenditController::class, 'createInvoice']);
 
+Route::get('/position-branch-company', [App\Http\Controllers\DropDownController::class, 'getPositionBranchCompany']);
 
 // API Check Clock
 Route::prefix('check-clock-settings')->group(function () {
@@ -35,6 +37,8 @@ Route::prefix('check-clocks')->group(function () {
     Route::delete('/{id}', [CheckClockController::class, 'destroy']);
     Route::get('/report', [CheckClockController::class, 'report']);
 });
+
+Route::post('/companies', [CompanyController::class, 'store']);
 
 Route::prefix('employee')->group(function () {
     Route::get('/', [EmployeeController::class, 'index']);

@@ -24,9 +24,9 @@ class DatabaseSeeder extends Seeder
             LetterFormatsTableSeeder::class,
             CompaniesSeeder::class,
             UserSeeder::class,
-            // BranchesSeeder::class,
-            // DivisionsSeeder::class,
-            // PositionsSeeder::class,
+            BranchesSeeder::class,
+            DivisionsSeeder::class,
+            PositionsSeeder::class,
         ]);
     }
 }
