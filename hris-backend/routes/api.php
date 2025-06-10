@@ -40,11 +40,30 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-// --- Rute Umum (tanpa otentikasi awal) ---
+
 Route::get('/package-plans', [PackagePlanController::class, 'index']);
 Route::get('/companies', [CompanyController::class, 'index']); // Mengambil daftar perusahaan
 Route::get('/company', [CompanyController::class, 'show']); // Mengambil detail perusahaan tertentu (perlu parameter?)
 Route::apiResource('checkouts', CheckoutController::class); // Rute RESTful untuk checkout
+
+Route::post('/companies', [CompanyController::class, 'store']);
+
+Route::prefix('employee')->group(function () {
+    Route::get('/', [EmployeeController::class, 'index']);
+    Route::get('/{id}', [EmployeeController::class, 'show']);
+    Route::post('/', [EmployeeController::class, 'store']);
+    Route::put('/{id}', [EmployeeController::class, 'update']);
+    Route::delete('/{id}', [EmployeeController::class, 'destroy']);
+    Route::delete('/achievements/{id}', [EmployeeController::class, 'removeAchievement']);
+});
+
+Route::prefix('letters')->group(function () {
+    Route::get('/', [LettersController::class, 'index']);
+    Route::post('/', [LettersController::class, 'store']);
+    Route::put('/{id}', [LettersController::class, 'update']);
+    Route::delete('/{id}', [LettersController::class, 'destroy']);
+});
+
 
 // Rute test API
 Route::get('/test', function () {

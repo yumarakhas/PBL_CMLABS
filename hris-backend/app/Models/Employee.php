@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\EmployeeAchievement;
+use App\Models\Branch;
+use App\Models\Division;
+use App\Models\Position;
 
 class Employee extends Model
 {
@@ -13,11 +17,17 @@ class Employee extends Model
     protected $fillable = [
         // ... other fillable fields from your migration
         'user_id',
+        'Company_id',
+        'EmployeeID',
         'FirstName',
         'LastName',
         'Gender',
         'Address',
         'PhoneNumber',
+        'Company_id',
+        'Branch_id',
+        'Division_id',
+        'Position_id',
         'Status',
         'NIK',
         'LastEducation',

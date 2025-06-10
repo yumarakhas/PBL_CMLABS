@@ -1,11 +1,12 @@
 "use client";
 import { usePageTitle } from "@/context/PageTitleContext";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { createEmployee, removeAchievement } from "@/lib/services/employee";
 import AchievementForm from "@/components/Achievement";
+import api from "@/lib/api";
 
 type EmployeeFormProps = {
   mode: "add" | "edit";
@@ -27,6 +28,21 @@ interface FileFromServer {
   name: string;
   url: string;
   original_filename?: string;
+}
+
+interface OptionItem {
+  id: number;
+  name: string;
+  Branch_id?: number;
+  Division_id?: number;
+}
+interface DropdownItem {
+  id_posisi: number;
+  nama_posisi: string;
+  id_divisi: number;
+  name_divisi: string;
+  id_branch: number;
+  name_branch: string;
 }
 
 function removeDuplicateFiles(files: File[]): File[] {
@@ -65,8 +81,10 @@ export default function EmployeeForm({
   const [PlaceOfBirth, setPlaceOfBirth] = useState(
     initialData?.PlaceOfBirth || ""
   );
-  const [Position, setPosition] = useState(initialData?.Position || "");
-  const [Division, setDivision] = useState(initialData?.Division || "");
+  const [Position, setPosition] = useState(initialData?.Position_id || "");
+  const [Division, setDivision] = useState(initialData?.Division_id || "");
+  const [Branch, setBranch] = useState(initialData?.Branch_id || "");
+
   const [ContractType, setContractType] = useState(
     initialData?.ContractType || ""
   );
@@ -79,7 +97,6 @@ export default function EmployeeForm({
   const [LastEducation, setLastEducation] = useState(
     initialData?.LastEducation || ""
   );
-  const [Branch, setBranch] = useState(initialData?.Branch || "");
   const [BankAccountNumber, setBankAccountNumber] = useState(
     initialData?.BankAccountNumber || ""
   );
@@ -94,6 +111,18 @@ export default function EmployeeForm({
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [imageLoadError, setImageLoadError] = useState<string>("");
 
+  // State untuk dropdown options
+  const [branches, setBranches] = useState<OptionItem[]>([]);
+  const [divisions, setDivisions] = useState<OptionItem[]>([]);
+  const [positions, setPositions] = useState<OptionItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // State untuk menyimpan semua data (untuk filtering)
+  const [allDivisions, setAllDivisions] = useState<OptionItem[]>([]);
+  const [allPositions, setAllPositions] = useState<OptionItem[]>([]);
+  const allDivisionsRef = useRef<OptionItem[]>([]);
+  const allPositionsRef = useRef<OptionItem[]>([]);
+
   useEffect(() => {
     setIsEditMode(mode === "edit");
 
@@ -102,15 +131,15 @@ export default function EmployeeForm({
       setPhoneNumber(initialData.PhoneNumber || "");
       setGender(initialData.Gender || "");
       setPlaceOfBirth(initialData.PlaceOfBirth || "");
-      setPosition(initialData.Position || "");
-      setDivision(initialData.Division || "");
+      setPosition(initialData.Position_id?.toString() || "");
+      setDivision(initialData.Division_id?.toString() || "");
+      setBranch(initialData.Branch_id?.toString() || "");
       setContractType(initialData.ContractType || "");
       setBank(initialData.Bank || "");
       setBankAccountHolderName(initialData.BankAccountHolderName || "");
       setLastName(initialData.LastName || "");
       setNIK(initialData.NIK || "");
       setLastEducation(initialData.LastEducation || "");
-      setBranch(initialData.Branch || "");
       setBankAccountNumber(initialData.BankAccountNumber || "");
       setAddress(initialData.Address || "");
       setStatus(initialData.Status || "");
@@ -129,7 +158,130 @@ export default function EmployeeForm({
 
       loadExistingAchievements(initialData);
     }
+
+    fetchOptions();
   }, [initialData, mode]);
+
+  const fetchOptions = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/position-branch-company");
+      const data = response.data as DropdownItem[];
+
+      // Extract unique branches
+      const uniqueBranches = Array.from(
+        new Map(
+          data.map((item: any) => [
+            item.id_branch,
+            {
+              id: item.id_branch,
+              name: item.name_branch,
+            },
+          ])
+        ).values()
+      );
+
+      // Extract unique divisions
+      const uniqueDivisions = Array.from(
+        new Map(
+          data.map((item: any) => [
+            item.id_divisi,
+            {
+              id: item.id_divisi,
+              name: item.name_divisi,
+              Branch_id: item.id_branch,
+            },
+          ])
+        ).values()
+      );
+
+      // Extract unique positions
+      const uniquePositions = Array.from(
+        new Map(
+          data.map((item: any) => [
+            item.id_posisi,
+            {
+              id: item.id_posisi,
+              name: item.nama_posisi,
+              Division_id: item.id_divisi,
+            },
+          ])
+        ).values()
+      );
+
+      setBranches(uniqueBranches);
+      setAllDivisions(uniqueDivisions);
+      setAllPositions(uniquePositions);
+
+      // Update refs for easy access
+      allDivisionsRef.current = uniqueDivisions;
+      allPositionsRef.current = uniquePositions;
+
+      // Set initial divisions dan positions jika dalam edit mode
+      if (initialData?.Branch_id) {
+        updateDivisionsForBranch(initialData.Branch_id, uniqueDivisions);
+        if (initialData?.Division_id) {
+          updatePositionsForDivision(initialData.Division_id, uniquePositions);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch options:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function untuk filter divisions berdasarkan branch
+  const updateDivisionsForBranch = (
+    BranchId: string | number,
+    allDivisions?: any[]
+  ) => {
+    const divisionsToUse = allDivisions || allDivisionsRef.current;
+    const filteredDivisions = divisionsToUse.filter(
+      (div: any) => div.Branch_id == BranchId
+    );
+    setDivisions(filteredDivisions);
+  };
+
+  // Helper function untuk filter positions berdasarkan division
+  const updatePositionsForDivision = (
+    divisionId: string | number,
+    allPositions?: any[]
+  ) => {
+    const positionsToUse = allPositions || allPositionsRef.current;
+    const filteredPositions = positionsToUse.filter(
+      (pos: any) => pos.Division_id == divisionId
+    );
+    setPositions(filteredPositions);
+  };
+
+  // Handle branch change
+  const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const branchId = e.target.value;
+    setBranch(branchId);
+    setDivision(""); // Reset division
+    setPosition(""); // Reset position
+
+    if (branchId) {
+      updateDivisionsForBranch(branchId);
+    } else {
+      setDivisions([]);
+    }
+    setPositions([]);
+  };
+
+  // Handle division change
+  const handleDivisionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const divisionId = e.target.value;
+    setDivision(divisionId);
+    setPosition(""); // Reset position
+
+    if (divisionId) {
+      updatePositionsForDivision(divisionId);
+    } else {
+      setPositions([]);
+    }
+  };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     console.error("Image failed to load:", photoUrl);
@@ -215,13 +367,13 @@ export default function EmployeeForm({
         NIK,
         Gender,
         PlaceOfBirth,
-        Position,
-        Division,
+        Position_id: Position,
+        Division_id: Division,
+        Branch_id: Branch,
         ContractType,
         Bank,
         BankAccountHolderName,
         LastEducation,
-        Branch,
         BankAccountNumber,
         Status,
         Address,
@@ -362,7 +514,6 @@ export default function EmployeeForm({
             )}
           </div>
           <div className="flex flex-col justify-center h-32">
-
             <label className="block mb-1 font-medium">Photo Profile</label>
 
             <label className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer text-sm inline-block">
@@ -470,11 +621,14 @@ export default function EmployeeForm({
               <select
                 value={Position}
                 onChange={(e) => setPosition(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading || !Division}>
                 <option value="">Choose the Position</option>
-                <option value="Staff">Staff</option>
-                <option value="Head of SubDivision">Head of SubDivision</option>
-                <option value="Head of Division">Head of Division</option>
+                {positions.map((position) => (
+                  <option key={position.id} value={position.id}>
+                    {position.name}
+                  </option>
+                ))}
               </select>
               {errors.Position && (
                 <p className="text-red-500 text-sm mt-1">{errors.Position}</p>
@@ -616,13 +770,15 @@ export default function EmployeeForm({
               <label className="block mb-1 font-medium">Branch</label>
               <select
                 value={Branch}
-                onChange={(e) => setBranch(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                onChange={handleBranchChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}>
                 <option value="">Choose the Branch</option>
-                <option value="Bekasi">Bekasi</option>
-                <option value="Surabaya">Surabaya</option>
-                <option value="Samarinda">Samarinda</option>
-                <option value="Solo">Solo</option>
+                {branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
               </select>
               {errors.Branch && (
                 <p className="text-red-500 text-sm mt-1">{errors.Branch}</p>
@@ -634,13 +790,15 @@ export default function EmployeeForm({
               <label className="block mb-1 font-medium">Division</label>
               <select
                 value={Division}
-                onChange={(e) => setDivision(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                onChange={handleDivisionChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading || !Branch}>
                 <option value="">Choose the Division</option>
-                <option value="Finance">Finance</option>
-                <option value="Human Resource">Human Resource</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Production">Production</option>
+                {divisions.map((division) => (
+                  <option key={division.id} value={division.id}>
+                    {division.name}
+                  </option>
+                ))}
               </select>
               {errors.Division && (
                 <p className="text-red-500 text-sm mt-1">{errors.Division}</p>
