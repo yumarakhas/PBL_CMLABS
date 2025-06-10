@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class Branch extends Model
 {
@@ -18,19 +21,19 @@ class Branch extends Model
         'description',
     ];
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function divisions()
+    public function divisions(): HasMany
     {
         return $this->hasMany(Division::class);
     }
 
-    public function employees()
+    public function employees(): HasMany
     {
+        // Assuming 'Branch_id' is the foreign key in the 'employees' table
         return $this->hasMany(Employee::class, 'Branch_id');
     }
 }
-

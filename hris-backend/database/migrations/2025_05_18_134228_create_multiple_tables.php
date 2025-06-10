@@ -23,6 +23,17 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('admin', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->string('phone_number')->nullable();
+            $table->string('phone')->nullable()->unique();
+            $table->string('profile_photo')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->nullable()->constrained()->onDelete('cascade');
@@ -220,6 +231,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('admin');
         Schema::dropIfExists('employees');
         Schema::dropIfExists('users');
         Schema::dropIfExists('sessions');

@@ -1,7 +1,14 @@
+// signin->idemployee->page.tsx
+"use client"; // Menandai komponen ini sebagai Client Component
+
+import { useState } from "react"; // Import useState hook
 import Image from "next/image";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react"; // Import Eye dan EyeOff icons
 
 export default function SignInWithIDEmployee() {
+  const [showPassword, setShowPassword] = useState(false); // State untuk visibilitas password
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Kiri - Ilustrasi */}
@@ -69,12 +76,19 @@ export default function SignInWithIDEmployee() {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
-              <div className="relative">
+              <div className="relative"> {/* Tambahkan relative positioning */}
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Mengubah tipe input berdasarkan state showPassword
                   placeholder="Enter your password"
-                  className="w-full border border-gray-400 p-3 rounded pr-10"
+                  className="w-full border border-gray-400 p-3 rounded pr-10" // Tambahkan padding kanan untuk ikon
                 />
+                <button
+                  type="button" // Penting: atur type menjadi button agar tidak submit form
+                  className="absolute right-3 top-3 text-gray-600" // Posisikan ikon
+                  onClick={() => setShowPassword(!showPassword)} // Toggle state showPassword
+                >
+                  {showPassword ? <EyeOff size={25} /> : <Eye size={25} />} {/* Render ikon sesuai state */}
+                </button>
               </div>
             </div>
 
