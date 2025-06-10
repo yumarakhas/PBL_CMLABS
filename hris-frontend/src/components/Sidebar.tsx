@@ -7,6 +7,7 @@ import {
   MdAccessTime,
   MdAssignment,
   MdLogout,
+  MdSettings,
 } from 'react-icons/md';
 import axios from 'axios';
 import { getCookie, deleteCookie } from 'cookies-next';
@@ -34,6 +35,7 @@ const adminMenuItems = [
   { icon: <MdGroups />, path: '/admin/employee-database', label: 'Employee' },
   { icon: <MdAccessTime />, path: '/admin/checkclock', label: 'Checkclock' },
   { icon: <MdAssignment />, path: '/admin/letter-management', label: 'Letter' },
+  { icon: <MdSettings />, path: '/admin/profile-admin', label: 'Profile' },
 ];
 
 const userMenuItems = [

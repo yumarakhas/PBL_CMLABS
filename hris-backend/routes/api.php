@@ -47,6 +47,7 @@ Route::get('/company', [CompanyController::class, 'show']); // Mengambil detail 
 Route::apiResource('checkouts', CheckoutController::class); // Rute RESTful untuk checkout
 
 Route::post('/companies', [CompanyController::class, 'store']);
+Route::get('/companies/{id}', [CompanyController::class, 'show']);
 
 Route::prefix('employee')->group(function () {
     Route::get('/', [EmployeeController::class, 'index']);
@@ -64,7 +65,6 @@ Route::prefix('letters')->group(function () {
     Route::delete('/{id}', [LettersController::class, 'destroy']);
 });
 
-
 // Rute test API
 Route::get('/test', function () {
     return response()->json(['message' => 'API works!']);
@@ -80,6 +80,14 @@ Route::get('/company-info', function () {
     return response()->json($company);
 });
 
+Route::get('/companies', function () {
+    $company = DB::table('companies')->first([
+        'name',
+        'email',
+        'head_office_phone',
+    ]);
+    return response()->json($company);
+});
 
 // --- Rute untuk Pengguna Umum/Karyawan (User) ---
 Route::prefix('user')->group(function () {
