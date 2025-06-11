@@ -135,8 +135,35 @@ export default function EmployeeDatabasetPage() {
   const fetchEmployees = async () => {
     try {
       const res = await getEmployees();
-      const employees = res.data.map((emp: any) => {
-        let achievements: AchievementData[] = [];
+      console.log("Raw API response:", res); // Debug: lihat struktur response
+
+      // Cek berbagai kemungkinan struktur response
+      let employeesData = [];
+
+      if (Array.isArray(res)) {
+        // Jika response langsung berupa array
+        employeesData = res;
+      } else if (res.data && Array.isArray(res.data)) {
+        // Jika data ada di res.data
+        employeesData = res.data;
+      } else if (res.employees && Array.isArray(res.employees)) {
+        // Jika data ada di res.employees
+        employeesData = res.employees;
+      } else if (
+        res.data &&
+        res.data.employees &&
+        Array.isArray(res.data.employees)
+      ) {
+        // Jika data ada di res.data.employees
+        employeesData = res.data.employees;
+      } else {
+        console.error("Unexpected response structure:", res);
+        // Set employeesData sebagai array kosong jika struktur tidak dikenali
+        employeesData = [];
+      }
+
+      const employees = employeesData.map((emp) => {
+        let achievements = [];
 
         // Handle berbagai format achievements dari backend
         if (emp.achievements) {
@@ -159,7 +186,7 @@ export default function EmployeeDatabasetPage() {
         }
 
         const validAchievements = achievements.filter(
-          (achievement: AchievementData) =>
+          (achievement) =>
             achievement &&
             (achievement.file_path || achievement.original_filename)
         );
@@ -172,16 +199,15 @@ export default function EmployeeDatabasetPage() {
 
       const currentDate = new Date();
 
-      const activeCount = employees.filter((emp: any) => {
+      const activeCount = employees.filter((emp) => {
         const status = String(emp.Status || "")
           .toLowerCase()
           .trim();
         return status === "aktif";
       }).length;
 
-      const branchCount = new Set(employees.map((emp: any) => emp.Branch)).size;
-      const divisionCount = new Set(employees.map((emp: any) => emp.Division))
-        .size;
+      const branchCount = new Set(employees.map((emp) => emp.Branch)).size;
+      const divisionCount = new Set(employees.map((emp) => emp.Division)).size;
 
       const formattedPeriod = currentDate.toLocaleString("default", {
         month: "long",
@@ -198,8 +224,8 @@ export default function EmployeeDatabasetPage() {
         Division: divisionCount,
       }));
 
-      console.log("Fetched employees with achievements:", employees);
-      employees.forEach((emp: any) => {
+      console.log("Processed employees:", employees);
+      employees.forEach((emp) => {
         if (emp.Achievements && emp.Achievements.length > 0) {
           console.log(
             `Employee ${emp.FirstName} has ${emp.Achievements.length} achievements:`,
@@ -209,6 +235,19 @@ export default function EmployeeDatabasetPage() {
       });
     } catch (error) {
       console.error("Error fetching employees:", error);
+      // Set state dengan data kosong jika terjadi error
+      setEmployees([]);
+      setSummary((prev) => ({
+        ...prev,
+        period: new Date().toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        }),
+        totalEmployees: 0,
+        activeEmployees: 0,
+        Branch: 0,
+        Division: 0,
+      }));
     }
   };
 

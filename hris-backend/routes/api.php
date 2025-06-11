@@ -13,10 +13,15 @@ use App\Models\Letter_formats as ModelsLetter_formats; // Ini sepertinya typo, b
 use App\Http\Controllers\PackagePlanController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\PackageController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CompanyDetailsController;
+use App\Http\Middleware\StepValidationMiddleware;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TopBarController;
 use App\Http\Controllers\Auth\EmployeeAuthController; // Pastikan ini di-import
+
 
 // --- Rute untuk Admin ---
 Route::prefix('admin')->group(function () {
@@ -24,6 +29,9 @@ Route::prefix('admin')->group(function () {
     Route::post('/login', [AdminAuthController::class, 'login']);
     Route::get('/google', [AdminAuthController::class, 'redirectToGoogle']);
     Route::get('/google/callback', [AdminAuthController::class, 'handleGoogleCallback']);
+  
+  Route::get('companies', [CompanyController::class, 'index']);
+  Route::get('/company', [CompanyController::class, 'show']);
 
     Route::middleware('auth:sanctum')->group(function () {
         // Rute untuk profil admin
@@ -46,8 +54,49 @@ Route::get('/companies', [CompanyController::class, 'index']); // Mengambil daft
 Route::get('/company', [CompanyController::class, 'show']); // Mengambil detail perusahaan tertentu (perlu parameter?)
 Route::apiResource('checkouts', CheckoutController::class); // Rute RESTful untuk checkout
 
+
+// Step 1 CompanyProfile
+Route::get('/company/me', [CompanyController::class, 'getAuthenticatedCompany']);
+
+// Order (Pemesanan & Pembayaran)
+Route::post('/orders', [PackageController::class, 'createOrder']);
+Route::get('/orders/{orderId}', [PackageController::class, 'getOrderWithCompany']);
+Route::post('/orders/{orderId}/confirm-payment', [PackageController::class, 'confirmPayment']);
+
+// Company Info
+Route::get('/company/fixed', [PackageController::class, 'getCompanyForCheckout']);
 Route::post('/companies', [CompanyController::class, 'store']);
 Route::get('/companies/{id}', [CompanyController::class, 'show']);
+
+Route::prefix('packages')->group(function () {
+    Route::get('/', [PackageController::class, 'getPackages']);
+    Route::get('/company', [PackageController::class, 'getAuthenticatedCompany']);
+    Route::post('/order', [PackageController::class, 'createOrder']);
+    Route::get('/order/{orderId}', [PackageController::class, 'getOrderWithCompany']);
+    Route::put('/order/{orderId}', [PackageController::class, 'updateOrder']);
+    Route::post('/order/{orderId}/payment', [PackageController::class, 'createPayment']);
+    Route::get('/order/{orderId}/payment/{paymentId}/status', [PackageController::class, 'checkPaymentStatus']);
+});
+
+Route::prefix('company-details')->group(function () {
+    Route::get('/subscription-info', [CompanyDetailsController::class, 'getSubscriptionInfo']);
+    Route::get('/branches', [CompanyDetailsController::class, 'getBranches']);
+    Route::post('/', [CompanyDetailsController::class, 'store']);
+});
+
+
+
+// Webhook Routes (should be outside any auth middleware)
+Route::post('/webhook/xendit', [PaymentController::class, 'handleWebhook']);
+
+// Payment success/failure redirect routes (for frontend)
+Route::get('/payment/success', function (Request $request) {
+    return redirect(config('app.frontend_url') . '/payment/success?' . http_build_query($request->all()));
+});
+
+Route::get('/payment/failed', function (Request $request) {
+    return redirect(config('app.frontend_url') . '/payment/failed?' . http_build_query($request->all()));
+});
 
 Route::prefix('employee')->group(function () {
     Route::get('/', [EmployeeController::class, 'index']);
@@ -56,7 +105,11 @@ Route::prefix('employee')->group(function () {
     Route::put('/{id}', [EmployeeController::class, 'update']);
     Route::delete('/{id}', [EmployeeController::class, 'destroy']);
     Route::delete('/achievements/{id}', [EmployeeController::class, 'removeAchievement']);
+    Route::get('/subscription/status', [EmployeeController::class, 'getSubscriptionStatus']);
 });
+
+
+Route::get('/position-branch-company', [App\Http\Controllers\DropDownController::class, 'getPositionBranchCompany']);
 
 Route::prefix('letters')->group(function () {
     Route::get('/', [LettersController::class, 'index']);

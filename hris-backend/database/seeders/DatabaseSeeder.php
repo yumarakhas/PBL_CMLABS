@@ -24,12 +24,13 @@ class DatabaseSeeder extends Seeder
             LetterFormatsTableSeeder::class,
             // CompaniesSeeder::class,
             UserSeeder::class,
-        
+            PackagesSeeder::class,
+            PackageBenefitsSeeder::class,
+
             // BranchesSeeder::class,
             // DivisionsSeeder::class,
             // PositionsSeeder::class,
         ]);
-        $this->call(PackagePlanSeeder::class);
 
     }
 }
