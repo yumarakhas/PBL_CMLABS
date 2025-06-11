@@ -1,7 +1,14 @@
+// signin->idemployee->page.tsx
+"use client"; // Menandai komponen ini sebagai Client Component
+
+import { useState } from "react"; // Import useState hook
 import Image from "next/image";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react"; // Import Eye dan EyeOff icons
 
 export default function SignInWithIDEmployee() {
+  const [showPassword, setShowPassword] = useState(false); // State untuk visibilitas password
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Kiri - Ilustrasi */}
@@ -34,7 +41,7 @@ export default function SignInWithIDEmployee() {
             </Link>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3">
+          <h1 className="text-xl sm:text-2xl font-bold mb-3">
             Sign in with ID Employee
           </h1>
           <p className="text-gray-600 mb-6">
@@ -62,19 +69,26 @@ export default function SignInWithIDEmployee() {
               <input
                 type="text"
                 placeholder="Enter your ID Employee"
-                className="w-full border border-gray-400 p-3 rounded"
+                className="w-full border border-gray-400 p-2 rounded"
               />
             </div>
 
             {/* Password */}
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
-              <div className="relative">
+              <div className="relative"> {/* Tambahkan relative positioning */}
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Mengubah tipe input berdasarkan state showPassword
                   placeholder="Enter your password"
-                  className="w-full border border-gray-400 p-3 rounded pr-10"
+                  className="w-full border border-gray-400 p-2 rounded pr-10" // Tambahkan padding kanan untuk ikon
                 />
+                <button
+                  type="button" // Penting: atur type menjadi button agar tidak submit form
+                  className="absolute right-3 top-3 text-gray-600" // Posisikan ikon
+                  onClick={() => setShowPassword(!showPassword)} // Toggle state showPassword
+                >
+                  {showPassword ? <EyeOff size={25} /> : <Eye size={25} />} {/* Render ikon sesuai state */}
+                </button>
               </div>
             </div>
 
@@ -108,7 +122,7 @@ export default function SignInWithIDEmployee() {
             {/* Tombol Sign In */}
             <button
               type="submit"
-              className="w-full bg-gray-800 text-white py-4 rounded font-semibold hover:bg-gray-900 transition"
+              className="w-full bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition"
             >
               SIGN IN
             </button>
@@ -116,7 +130,7 @@ export default function SignInWithIDEmployee() {
             {/* Tombol Sign in dengan metode lain */}
             <button
               type="button"
-              className="w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Use a different sign-in method
             </button>

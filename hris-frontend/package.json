@@ -15,6 +15,7 @@
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cookies-next": "^6.0.0",
     "emailjs-com": "^3.2.0",
     "file-saver": "^2.0.5",
     "file-server": "^2.2.1",
@@ -39,7 +40,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/xlsx": "^0.0.36",
+    "@types/xlsx": "^0.0.35",
     "eslint": "^9",
     "eslint-config-next": "15.3.1"
   }

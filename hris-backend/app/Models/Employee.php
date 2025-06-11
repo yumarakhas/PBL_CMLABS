@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\EmployeeAchievement;
 use App\Models\Branch;
 use App\Models\Division;
@@ -14,6 +15,7 @@ class Employee extends Model
     use HasFactory;
 
     protected $fillable = [
+        // ... other fillable fields from your migration
         'user_id',
         'Company_id',
         'EmployeeID',
@@ -37,21 +39,29 @@ class Employee extends Model
         'BankAccountHolderName',
         'photo',
         'Notes',
+        'EmployeeID', // Ensure this is fillable
     ];
 
-    public function achievements()
+    /**
+     * Get the user that owns the employee.
+     */
+    public function user(): BelongsTo
     {
-        return $this->hasMany(Achievement::class, 'employee_id');
+        return $this->belongsTo(User::class);
     }
-    public function branch()
+
+    // Add relationships to Branch, Division, Position if needed
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class, 'Branch_id');
     }
-    public function division()
+
+    public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class, 'Division_id');
     }
-    public function position()
+
+    public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class, 'Position_id');
     }

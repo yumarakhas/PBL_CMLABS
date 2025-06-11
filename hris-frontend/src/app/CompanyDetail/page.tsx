@@ -1,147 +1,266 @@
 "use client";
 
-import { useState } from "react";
-import { FaTrash, FaPlus } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import {
+  FaTrash,
+  FaPlus,
+  FaBuilding,
+  FaSitemap,
+  FaUsers,
+} from "react-icons/fa";
 
-interface Branch {
-  id?: number;
-  company_id?: number;
-  name: string;
-  branch_address: string;
-  branch_phone: string;
-  branch_phone_backup?: string;
-  description?: string;
-}
-
-interface Division {
-  id?: number;
-  branch_id: number;
-  name: string;
-  description?: string;
-}
-
-interface Position {
-  id?: number;
-  division_id: number;
-  name: string;
-  description?: string;
-}
+// Mock data untuk demonstrasi
+const mockSubscriptionInfo = {
+  current_branch_count: 2,
+  max_branches: 5,
+  remaining_branches: 3,
+};
 
 export default function CompanyDetailPage() {
-  const [branches, setBranches] = useState<Branch[]>([
+  const [branches, setBranches] = useState([
     {
       name: "",
       branch_address: "",
       branch_phone: "",
       branch_phone_backup: "",
       description: "",
+      divisions: [
+        {
+          name: "",
+          description: "",
+          positions: [
+            {
+              name: "",
+              description: "",
+            },
+          ],
+        },
+      ],
     },
   ]);
-  const router = useRouter();
 
-  const [divisions, setDivisions] = useState<Division[]>([
-    { branch_id: 0, name: "", description: "" },
-  ]);
+  const [subscriptionInfo, setSubscriptionInfo] =
+    useState(mockSubscriptionInfo);
+  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [positions, setPositions] = useState<Position[]>([
-    { division_id: 0, name: "", description: "" },
-  ]);
-
-  const handleBranchChange = (
-    index: number,
-    field: keyof Branch,
-    value: string
-  ) => {
+  // Branch handlers
+  const handleBranchChange = (branchIndex, field, value) => {
     const updated = [...branches];
-    (updated[index][field] as string | undefined) = value;
+    if (field !== "divisions") {
+      updated[branchIndex][field] = value;
+    }
     setBranches(updated);
   };
 
-  const handleDivisionChange = (
-    index: number,
-    field: keyof Division,
-    value: string
-  ) => {
-    const updated = [...divisions];
-    (updated[index][field] as string | number | undefined) = value;
-    setDivisions(updated);
+  const addBranch = () => {
+    if (subscriptionInfo && branches.length >= subscriptionInfo.max_branches) {
+      alert(
+        `You can only create maximum ${subscriptionInfo.max_branches} branches based on your subscription plan.`
+      );
+      return;
+    }
+
+    setBranches([
+      ...branches,
+      {
+        name: "",
+        branch_address: "",
+        branch_phone: "",
+        branch_phone_backup: "",
+        description: "",
+        divisions: [
+          {
+            name: "",
+            description: "",
+            positions: [
+              {
+                name: "",
+                description: "",
+              },
+            ],
+          },
+        ],
+      },
+    ]);
   };
 
-  const handlePositionChange = (
-    index: number,
-    field: keyof Position,
-    value: string | number
-  ) => {
-    const updated = [...positions];
-    (updated[index][field] as string | number | undefined) = value;
-    setPositions(updated);
+  const removeBranch = (branchIndex) => {
+    if (branches.length <= 1) {
+      alert("At least one branch is required");
+      return;
+    }
+    setBranches(branches.filter((_, i) => i !== branchIndex));
   };
 
-  const handleAdd = (type: "branch" | "division" | "position") => {
-    if (type === "branch") {
-      setBranches([
-        ...branches,
+  // Division handlers
+  const handleDivisionChange = (branchIndex, divisionIndex, field, value) => {
+    const updated = [...branches];
+    if (field !== "positions") {
+      updated[branchIndex].divisions[divisionIndex][field] = value;
+    }
+    setBranches(updated);
+  };
+
+  const addDivision = (branchIndex) => {
+    const updated = [...branches];
+    updated[branchIndex].divisions.push({
+      name: "",
+      description: "",
+      positions: [
         {
           name: "",
-          branch_address: "",
-          branch_phone: "",
-          branch_phone_backup: "",
           description: "",
         },
-      ]);
-    } else if (type === "division") {
-      setDivisions([...divisions, { branch_id: 0, name: "", description: "" }]);
-    } else {
-      setPositions([
-        ...positions,
-        { division_id: 0, name: "", description: "" },
-      ]);
-    }
+      ],
+    });
+    setBranches(updated);
   };
 
-  const handleRemove = (
-    type: "branch" | "division" | "position",
-    index: number
-  ) => {
-    if (type === "branch") {
-      setBranches(branches.filter((_, i) => i !== index));
-    } else if (type === "division") {
-      setDivisions(divisions.filter((_, i) => i !== index));
-    } else {
-      setPositions(positions.filter((_, i) => i !== index));
+  const removeDivision = (branchIndex, divisionIndex) => {
+    const updated = [...branches];
+    if (updated[branchIndex].divisions.length <= 1) {
+      alert("At least one division is required per branch");
+      return;
     }
+    updated[branchIndex].divisions = updated[branchIndex].divisions.filter(
+      (_, i) => i !== divisionIndex
+    );
+    setBranches(updated);
+  };
+
+  // Position handlers
+  const handlePositionChange = (
+    branchIndex,
+    divisionIndex,
+    positionIndex,
+    field,
+    value
+  ) => {
+    const updated = [...branches];
+    updated[branchIndex].divisions[divisionIndex].positions[positionIndex][
+      field
+    ] = value;
+    setBranches(updated);
+  };
+
+  const addPosition = (branchIndex, divisionIndex) => {
+    const updated = [...branches];
+    updated[branchIndex].divisions[divisionIndex].positions.push({
+      name: "",
+      description: "",
+    });
+    setBranches(updated);
+  };
+
+  const removePosition = (branchIndex, divisionIndex, positionIndex) => {
+    const updated = [...branches];
+    if (updated[branchIndex].divisions[divisionIndex].positions.length <= 1) {
+      alert("At least one position is required per division");
+      return;
+    }
+    updated[branchIndex].divisions[divisionIndex].positions = updated[
+      branchIndex
+    ].divisions[divisionIndex].positions.filter((_, i) => i !== positionIndex);
+    setBranches(updated);
+  };
+
+  const validateForm = () => {
+    for (let i = 0; i < branches.length; i++) {
+      const branch = branches[i];
+      if (!branch.name.trim()) {
+        alert(`Branch ${i + 1}: Name is required`);
+        return false;
+      }
+      if (!branch.branch_address.trim()) {
+        alert(`Branch ${i + 1}: Address is required`);
+        return false;
+      }
+      if (!branch.branch_phone.trim()) {
+        alert(`Branch ${i + 1}: Phone is required`);
+        return false;
+      }
+
+      if (!branch.divisions || branch.divisions.length === 0) {
+        alert(`Branch ${i + 1}: At least one division is required`);
+        return false;
+      }
+
+      for (let j = 0; j < branch.divisions.length; j++) {
+        const division = branch.divisions[j];
+        if (!division.name.trim()) {
+          alert(`Branch ${i + 1}, Division ${j + 1}: Name is required`);
+          return false;
+        }
+
+        if (!division.positions || division.positions.length === 0) {
+          alert(
+            `Branch ${i + 1}, Division ${
+              j + 1
+            }: At least one position is required`
+          );
+          return false;
+        }
+
+        for (let k = 0; k < division.positions.length; k++) {
+          const position = division.positions[k];
+          if (!position.name.trim()) {
+            alert(
+              `Branch ${i + 1}, Division ${j + 1}, Position ${
+                k + 1
+              }: Name is required`
+            );
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   };
 
   const handleSubmit = async () => {
-    try {
-      const response = await fetch("/api/company-details", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ branches, divisions, positions }),
-      });
+    if (!validateForm()) return;
 
-      if (response.ok) {
-        alert("Company details saved successfully!");
-        router.push("/admin/dashboard");
-      } else {
-        alert("Error saving company details");
-      }
+    setIsSubmitting(true);
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      alert("Company details saved successfully!");
     } catch (error) {
       console.error("Error:", error);
       alert("Error saving company details");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const handleBack = () => {
+    // Simulate router back
+    console.log("Going back...");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#e8f1fb] min-h-screen py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Company Detail</h1>
-          <p className="text-gray-600 mt-2">
-            Complete your company details to finalize your HRIS setup
+      {/* Header Section */}
+      <div className="text-center mb-8">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+            Company Detail
+          </h1>
+          <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base mb-4">
+            Help us get started by providing your company's basic information.
           </p>
         </div>
 
@@ -152,10 +271,10 @@ export default function CompanyDetailPage() {
               <div key={index} className="flex items-center">
                 <div className="flex flex-col items-center">
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2 ${
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-200 ${
                       index === 3
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-400 border-gray-300"
+                        ? "bg-[#1E3A5F] text-white border-[#1E3A5F] shadow-lg"
+                        : "bg-white text-[#1E3A5F] border-[#1E3A5F]"
                     }`}>
                     {index + 1}
                   </div>
@@ -163,295 +282,378 @@ export default function CompanyDetailPage() {
                     {label}
                   </span>
                 </div>
-                {index < 3 && <div className="w-16 h-1 bg-gray-300 mx-4" />}
+                {index < 3 && (
+                  <div
+                    className={`w-16 h-1 mx-4 rounded-full ${
+                      index === 3 ? "bg-[#1E3A5F]" : "bg-gray-300"
+                    }`}
+                  />
+                )}
               </div>
             )
           )}
         </div>
+        {/* Subscription Info */}
+        {subscriptionInfo && (
+          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-full text-emerald-700 text-sm font-medium shadow-sm">
+            <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center mr-2">
+              <svg
+                className="w-3 h-3 text-emerald-600"
+                fill="currentColor"
+                viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <span className="font-semibold">
+              {subscriptionInfo.max_branches}
+            </span>
+            <span className="ml-1 opacity-80">branches available</span>
+          </div>
+        )}
+      </div>
 
-        {/* Branch Information */}
-        <div className="bg-white p-6 rounded-lg shadow mb-5">
-          <div className="px-4 py-3 rounded-t-md mb-4">
-            <h2 className="font-bold text-lg mb-4">Branch Information</h2>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-500">
-                <thead className="bg-[#1E3A5F]">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                      No.
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                      Branch Name
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                      Branch Address
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                      Branch Phone
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                      Backup Phone
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                      Description
-                    </th>
-                    <th className="px-4 py-2 text-center text-sm font-semibold text-white">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {branches.map((branch, i) => (
-                    <tr key={i} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 text-sm">{i + 1}</td>
-                      <td className="px-4 py-2">
-                        <input
-                          value={branch.name}
-                          onChange={(e) =>
-                            handleBranchChange(i, "name", e.target.value)
-                          }
-                          placeholder="Branch Name"
-                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          value={branch.branch_address}
-                          onChange={(e) =>
-                            handleBranchChange(
-                              i,
-                              "branch_address",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Address"
-                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          value={branch.branch_phone}
-                          onChange={(e) =>
-                            handleBranchChange(
-                              i,
-                              "branch_phone",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Phone"
-                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          value={branch.branch_phone_backup}
-                          onChange={(e) =>
-                            handleBranchChange(
-                              i,
-                              "branch_phone_backup",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Backup Phone"
-                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          value={branch.description}
-                          onChange={(e) =>
-                            handleBranchChange(i, "description", e.target.value)
-                          }
-                          placeholder="Desc"
-                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <button
-                          onClick={() => handleRemove("branch", i)}
-                          className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm">
-                          <FaTrash size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Add New Button */}
-              <div className="px-4 py-4">
+      {/* Branches Section */}
+      <div className="space-y-6 max-w-5xl mx-auto">
+        {branches.map((branch, branchIndex) => (
+          <div
+            key={branchIndex}
+            className="bg-white rounded-lg shadow-sm border border-gray-200">
+            {/* Branch Header */}
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-3">
+                  <FaBuilding className="text-gray-600" />
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Branch {branchIndex + 1}
+                  </h2>
+                </div>
                 <button
-                  onClick={() => handleAdd("branch")}
-                  className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
-                  <FaPlus size={14} className="mr-1" /> Add New Branch
+                  onClick={() => removeBranch(branchIndex)}
+                  disabled={branches.length <= 1}
+                  className={`p-2 rounded-md transition-colors ${
+                    branches.length <= 1
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-red-50 text-red-600 hover:bg-red-100"
+                  }`}>
+                  <FaTrash size={14} />
                 </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Position Information */}
-          <div className="bg-white p-6 rounded-lg shadow mb-5">
-            <div className="px-4 py-3 rounded-t-md mb-4">
-              <h2 className="font-bold text-lg mb-4">Position Information</h2>
-
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-500">
-                  <thead className="bg-[#1E3A5F]">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                        No
-                      </th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                        Position
-                      </th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                        Description
-                      </th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-white">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {positions.map((pos, i) => (
-                      <tr key={i} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 text-sm">{i + 1}</td>
-                        <td className="px-4 py-2">
-                          <input
-                            value={pos.name}
-                            onChange={(e) =>
-                              handlePositionChange(i, "name", e.target.value)
-                            }
-                            placeholder="Position Name"
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            value={pos.description}
-                            onChange={(e) =>
-                              handlePositionChange(
-                                i,
-                                "description",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Description"
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <button
-                            onClick={() => handleRemove("position", i)}
-                            className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm">
-                            <FaTrash size={14} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div className="px-4 py-4">
-                  <button
-                    onClick={() => handleAdd("position")}
-                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    <FaPlus size={14} className="mr-1" /> Add New Position
-                  </button>
+            <div className="p-6">
+              {/* Branch Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={branch.name}
+                    onChange={(e) =>
+                      handleBranchChange(branchIndex, "name", e.target.value)
+                    }
+                    placeholder="Enter branch name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch Phone *
+                  </label>
+                  <input
+                    type="text"
+                    value={branch.branch_phone}
+                    onChange={(e) =>
+                      handleBranchChange(
+                        branchIndex,
+                        "branch_phone",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Enter branch phone"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch Address *
+                  </label>
+                  <textarea
+                    value={branch.branch_address}
+                    onChange={(e) =>
+                      handleBranchChange(
+                        branchIndex,
+                        "branch_address",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Enter branch address"
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Backup Phone
+                  </label>
+                  <input
+                    type="text"
+                    value={branch.branch_phone_backup || ""}
+                    onChange={(e) =>
+                      handleBranchChange(
+                        branchIndex,
+                        "branch_phone_backup",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Enter backup phone"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    value={branch.description || ""}
+                    onChange={(e) =>
+                      handleBranchChange(
+                        branchIndex,
+                        "description",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Enter branch description"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Division Information */}
-          <div className="bg-white p-6 rounded-lg shadow mb-5">
-            <div className="px-4 py-3 rounded-t-md mb-4">
-              <h2 className="font-bold text-lg mb-4">Division Information</h2>
+              {/* Divisions */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center space-x-2">
+                    <FaSitemap className="text-gray-600" />
+                    <h3 className="text-base font-semibold text-gray-800">
+                      Divisions
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => addDivision(branchIndex)}
+                    className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
+                    <FaPlus size={12} className="mr-1" /> Add Division
+                  </button>
+                </div>
 
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-500">
-                  <thead className="bg-[#1E3A5F]">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                        No
-                      </th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                        Division
-                      </th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-white">
-                        Description
-                      </th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-white">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {divisions.map((div, i) => (
-                      <tr key={i} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 text-sm">{i + 1}</td>
-                        <td className="px-4 py-2">
+                <div className="space-y-4">
+                  {branch.divisions.map((division, divisionIndex) => (
+                    <div
+                      key={divisionIndex}
+                      className="border border-gray-200 rounded-md p-4 bg-gray-50">
+                      {/* Division Header */}
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="font-medium text-gray-700">
+                          Division {divisionIndex + 1}
+                        </h4>
+                        <button
+                          onClick={() =>
+                            removeDivision(branchIndex, divisionIndex)
+                          }
+                          disabled={branch.divisions.length <= 1}
+                          className={`p-1 rounded text-xs ${
+                            branch.divisions.length <= 1
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-red-50 text-red-600 hover:bg-red-100"
+                          }`}>
+                          <FaTrash size={12} />
+                        </button>
+                      </div>
+
+                      {/* Division Information */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Division Name *
+                          </label>
                           <input
-                            value={div.name}
-                            onChange={(e) =>
-                              handleDivisionChange(i, "name", e.target.value)
-                            }
-                            placeholder="Division Name"
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            value={div.description}
+                            type="text"
+                            value={division.name}
                             onChange={(e) =>
                               handleDivisionChange(
-                                i,
+                                branchIndex,
+                                divisionIndex,
+                                "name",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Enter division name"
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Description
+                          </label>
+                          <input
+                            type="text"
+                            value={division.description || ""}
+                            onChange={(e) =>
+                              handleDivisionChange(
+                                branchIndex,
+                                divisionIndex,
                                 "description",
                                 e.target.value
                               )
                             }
-                            placeholder="Description"
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Enter division description"
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                           />
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <button
-                            onClick={() => handleRemove("division", i)}
-                            className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm">
-                            <FaTrash size={14} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      </div>
 
-                <div className="px-4 py-4">
-                  <button
-                    onClick={() => handleAdd("division")}
-                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    <FaPlus size={14} className="mr-1" /> Add New Division
-                  </button>
+                      {/* Positions */}
+                      <div className="border-t border-gray-200 pt-3">
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="flex items-center space-x-1">
+                            <FaUsers className="text-gray-500 text-sm" />
+                            <h5 className="text-sm font-medium text-gray-600">
+                              Positions
+                            </h5>
+                          </div>
+                          <button
+                            onClick={() =>
+                              addPosition(branchIndex, divisionIndex)
+                            }
+                            className="flex items-center px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors">
+                            <FaPlus size={10} className="mr-1" /> Add Position
+                          </button>
+                        </div>
+
+                        <div className="space-y-2">
+                          {division.positions.map((position, positionIndex) => (
+                            <div
+                              key={positionIndex}
+                              className="flex items-center gap-2 p-2 bg-white rounded border border-gray-200">
+                              <div className="flex-1">
+                                <input
+                                  type="text"
+                                  value={position.name}
+                                  onChange={(e) =>
+                                    handlePositionChange(
+                                      branchIndex,
+                                      divisionIndex,
+                                      positionIndex,
+                                      "name",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Position name"
+                                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                  required
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <input
+                                  type="text"
+                                  value={position.description || ""}
+                                  onChange={(e) =>
+                                    handlePositionChange(
+                                      branchIndex,
+                                      divisionIndex,
+                                      positionIndex,
+                                      "description",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Position description"
+                                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                              </div>
+                              <button
+                                onClick={() =>
+                                  removePosition(
+                                    branchIndex,
+                                    divisionIndex,
+                                    positionIndex
+                                  )
+                                }
+                                disabled={division.positions.length <= 1}
+                                className={`p-1 rounded text-xs ${
+                                  division.positions.length <= 1
+                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                    : "bg-red-50 text-red-600 hover:bg-red-100"
+                                }`}>
+                                <FaTrash size={10} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        ))}
+      </div>
 
-        {/* Action Buttons */}
-        <div className="mt-8 flex justify-end gap-4">
-          <button className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 font-medium">
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-medium">
-            Save
-          </button>
-        </div>
+      {/* Add Branch Button */}
+      <div className="mt-6 flex justify-center">
+        <button
+          onClick={addBranch}
+          disabled={
+            subscriptionInfo
+              ? branches.length >= subscriptionInfo.max_branches
+              : false
+          }
+          className={`flex items-center px-6 py-3 rounded-md font-medium transition-colors ${
+            subscriptionInfo && branches.length >= subscriptionInfo.max_branches
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700"
+          }`}>
+          <FaPlus size={16} className="mr-2" /> Add New Branch
+          {subscriptionInfo &&
+            branches.length >= subscriptionInfo.max_branches && (
+              <span className="ml-2 text-sm">(Limit reached)</span>
+            )}
+        </button>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mt-8 flex justify-center gap-4">
+        <button
+          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-medium transition-colors"
+          onClick={handleBack}>
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className={`px-6 py-2 rounded-md font-medium transition-colors ${
+            isSubmitting
+              ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700"
+          }`}>
+          {isSubmitting ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+              Saving...
+            </div>
+          ) : (
+            "Save Company Details"
+          )}
+        </button>
       </div>
     </div>
   );

@@ -30,13 +30,27 @@ export default function CompanyProfileForm() {
     const newErrors: Partial<typeof formData> = {};
 
     if (!formData.name) newErrors.name = "Company name is required.";
+
     if (!formData.head_office_address)
       newErrors.head_office_address = "Address is required.";
-    if (!formData.head_office_phone)
+
+    if (!formData.head_office_phone) {
       newErrors.head_office_phone = "Phone number is required.";
+    } else if (!/^\d{12}$/.test(formData.head_office_phone)) {
+      newErrors.head_office_phone = "Phone number must be exactly 12 digits.";
+    }
+
+    if (
+      formData.head_office_phone_backup &&
+      !/^\d{12}$/.test(formData.head_office_phone_backup)
+    ) {
+      newErrors.head_office_phone_backup =
+        "Backup phone number must be 12 digits.";
+    }
+
     if (!formData.email) {
       newErrors.email = "Email is required.";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Invalid email format.";
     }
 
@@ -65,41 +79,43 @@ export default function CompanyProfileForm() {
   return (
     <div className="bg-[#e8f1fb] min-h-screen py-12 px-4">
       {/* Header Section */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Company Profile</h1>
-        <p className="text-gray-600 mt-2">
+      <div className="text-center mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+          Company Profile
+        </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
           Help us get started by providing your company’s basic information.
         </p>
       </div>
 
       {/* Stepper */}
-      <div className="flex justify-center items-center space-x-8 my-8">
-        {steps.map((label, index) => {
-          const isActive = currentStep === index + 1;
-          return (
+      <div className="flex justify-center items-center space-x-8 mb-12">
+        {["Company Profile", "Package", "Checkout", "Company Detail"].map(
+          (label, index) => (
             <div key={index} className="flex items-center">
-              {/* Step Item */}
               <div className="flex flex-col items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold border ${
-                    isActive
-                      ? "bg-[#1E3A5F] text-white border-[#1E3A5F]"
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-200 ${
+                    index === 0
+                      ? "bg-[#1E3A5F] text-white border-[#1E3A5F] shadow-lg"
                       : "bg-white text-[#1E3A5F] border-[#1E3A5F]"
                   }`}>
                   {index + 1}
                 </div>
-                <span className="text-xs text-[#1E3A5F] mt-1 text-center w-24">
+                <span className="text-sm mt-2 text-gray-600 w-24 text-center font-medium">
                   {label}
                 </span>
               </div>
-
-              {/* Garis Penghubung */}
-              {index < steps.length - 1 && (
-                <div className="w-20 h-0.5 bg-black mx-2" />
+              {index < 3 && (
+                <div
+                  className={`w-16 h-1 mx-4 rounded-full ${
+                    index === 0 ? "bg-[#1E3A5F]" : "bg-gray-300"
+                  }`}
+                />
               )}
             </div>
-          );
-        })}
+          )
+        )}
       </div>
 
       <form
@@ -222,12 +238,12 @@ export default function CompanyProfileForm() {
         <div className="mt-6 flex justify-end space-x-4">
           <button
             type="button"
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+            className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
             Cancel
           </button>
           <button
             type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            className="bg-[#1E3A5F] text-white px-4 py-2 rounded hover:bg-[#36597F]">
             Save
           </button>
         </div>

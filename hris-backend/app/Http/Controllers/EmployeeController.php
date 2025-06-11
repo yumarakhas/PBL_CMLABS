@@ -13,22 +13,80 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Branch;
 use App\Models\Division;
 use App\Models\Position;
+use App\Models\Subscription;
+use App\Models\Company;
 
 class EmployeeController extends Controller
 {
+    /**
+     * Check if company has active subscription and employee limit
+     */
+    private function checkSubscriptionLimits($companyId, $excludeEmployeeId = null)
+    {
+        $company = Company::find($companyId);
+        if (!$company) {
+            return ['status' => false, 'message' => 'Company not found'];
+        }
+
+        // Get active subscription
+        $subscription = Subscription::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
+            ->with('package.packageBenefits')
+            ->first();
+
+        if (!$subscription) {
+            return ['status' => false, 'message' => 'No active subscription found'];
+        }
+
+        // Get current employee count (excluding the employee being updated if any)
+        $currentEmployeeCount = Employee::where('Company_id', $companyId);
+        if ($excludeEmployeeId) {
+            $currentEmployeeCount->where('id', '!=', $excludeEmployeeId);
+        }
+        $currentEmployeeCount = $currentEmployeeCount->count();
+
+        // Calculate total employee limit
+        $packageBenefit = $subscription->package->packageBenefits->first();
+        $totalEmployeeLimit = $packageBenefit->max_employees + $subscription->extra_employee;
+
+        if ($currentEmployeeCount >= $totalEmployeeLimit) {
+            return [
+                'status' => false, 
+                'message' => "Employee limit reached. Current: {$currentEmployeeCount}, Limit: {$totalEmployeeLimit}"
+            ];
+        }
+
+        return [
+            'status' => true, 
+            'current_count' => $currentEmployeeCount,
+            'limit' => $totalEmployeeLimit,
+            'subscription' => $subscription
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Employee::with('achievements');
+        // Get company ID from authenticated user or request
+        $companyId = $request->input('company_id', 1); // Default to 1 for testing
+        // $companyId = auth()->user()->company_id; // Use this when authentication is implemented
+
+        // Check subscription status
+        $subscriptionCheck = $this->checkSubscriptionLimits($companyId);
+        
+        $query = Employee::with('achievements')
+            ->where('Company_id', $companyId); // Filter by company
 
         if ($request->has('status')) {
             $query->whereIn('status', $request->input('status'));
         }
 
         if ($request->has('division')) {
-            $query->whereIn('Division_id', $request->input('division')); // pastikan nama field sesuai
+            $query->whereIn('Division_id', $request->input('division'));
         }
 
         if ($request->has('position')) {
@@ -39,7 +97,7 @@ class EmployeeController extends Controller
             $query->whereIn('Branch_id', $request->input('branch'));
         }
 
-        return response()->json($query->get()->map(function ($emp) {
+        $employees = $query->get()->map(function ($emp) {
             return [
                 ...$emp->toArray(),
                 'photo_url' => $emp->photo ? asset('storage/' . $emp->photo) : null,
@@ -54,7 +112,17 @@ class EmployeeController extends Controller
                 'Division' => $emp->division?->name,
                 'Position' => $emp->position?->name,
             ];
-        }));
+        });
+
+        return response()->json([
+            'employees' => $employees,
+            'subscription_info' => [
+                'has_active_subscription' => $subscriptionCheck['status'],
+                'current_employee_count' => $subscriptionCheck['current_count'] ?? 0,
+                'employee_limit' => $subscriptionCheck['limit'] ?? 0,
+                'message' => $subscriptionCheck['message'] ?? null
+            ]
+        ]);
     }
 
     /**
@@ -62,7 +130,6 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-
         $validated = $request->validate([
             'FirstName' => 'required|string',
             'LastName' => 'required|string',
@@ -83,16 +150,23 @@ class EmployeeController extends Controller
             'BankAccountHolderName' => 'required|string',
             'photo' => 'required|file|image|mimes:jpg,jpeg,png|max:2048',
             'Notes' => 'nullable|string',
-
             'Achievements' => 'nullable|array',
             'Achievements.*.file' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
         ]);
 
         $validated['user_id'] = 1;
         $validated['Company_id'] = 1;
-        // ubah kalau sudah login
-        // $validated['user_id'] = auth()->id(); // atau Auth::user()->id
+        // $validated['user_id'] = auth()->id();
         // $validated['Company_id'] = auth()->user()->company_id;
+
+        // Check subscription limits before creating employee
+        $subscriptionCheck = $this->checkSubscriptionLimits($validated['Company_id']);
+        if (!$subscriptionCheck['status']) {
+            return response()->json([
+                'message' => $subscriptionCheck['message'],
+                'subscription_required' => true
+            ], 403);
+        }
 
         $branch = Branch::find($validated['Branch_id']);
         $division = Division::find($validated['Division_id']);
@@ -130,8 +204,6 @@ class EmployeeController extends Controller
 
         $employee = Employee::create($validated);
 
-        // $achievements = $request->input('Achievements');
-
         $achievementFiles = $request->file('Achievements', []);
         foreach ($achievementFiles as $achievement) {
             if (isset($achievement['file']) && $achievement['file']) {
@@ -150,7 +222,13 @@ class EmployeeController extends Controller
 
         $employee->photo_url = $employee->photo ? asset('storage/' . $employee->photo) : null;
 
-        return response()->json($employee, 201);
+        return response()->json([
+            'employee' => $employee,
+            'subscription_info' => [
+                'current_employee_count' => $subscriptionCheck['current_count'] + 1,
+                'employee_limit' => $subscriptionCheck['limit']
+            ]
+        ], 201);
     }
 
     /**
@@ -158,7 +236,6 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
         $employee = Employee::findOrFail($id);
 
         $validated = $request->validate([
@@ -181,17 +258,23 @@ class EmployeeController extends Controller
             'BankAccountHolderName' => 'required|string',
             'photo' => 'nullable|file|image|mimes:jpg,jpeg,png|max:2048',
             'Notes' => 'nullable|string',
-
-            // Achievements
             'Achievements' => 'nullable|array',
             'Achievements.*.file' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
         ]);
 
         $validated['user_id'] = 1;
         $validated['Company_id'] = 1;
-        // ubah kalau sudah login
-        // $validated['user_id'] = auth()->id(); // atau Auth::user()->id
+        // $validated['user_id'] = auth()->id();
         // $validated['Company_id'] = auth()->user()->company_id;
+
+        // Check subscription status (excluding current employee from count)
+        $subscriptionCheck = $this->checkSubscriptionLimits($validated['Company_id'], $employee->id);
+        if (!$subscriptionCheck['status']) {
+            return response()->json([
+                'message' => $subscriptionCheck['message'],
+                'subscription_required' => true
+            ], 403);
+        }
 
         $branch = Branch::find($validated['Branch_id']);
         $division = Division::find($validated['Division_id']);
@@ -300,8 +383,7 @@ class EmployeeController extends Controller
 
     public function show($id)
     {
-        $employee = Employee::with('achievements')->find($id);
-        $employee = Employee::with(['branch', 'division', 'position'])->findOrFail($id);
+        $employee = Employee::with(['achievements', 'branch', 'division', 'position'])->findOrFail($id);
 
         if (!$employee) {
             return response()->json(['message' => 'Employee not found'], 404);
@@ -346,5 +428,26 @@ class EmployeeController extends Controller
                 'success' => false
             ], 500);
         }
+    }
+
+    /**
+     * Get subscription status and limits for current company
+     */
+    public function getSubscriptionStatus(Request $request)
+    {
+        $companyId = $request->input('company_id', 1);
+        // $companyId = auth()->user()->company_id;
+
+        $subscriptionCheck = $this->checkSubscriptionLimits($companyId);
+
+        return response()->json([
+            'has_active_subscription' => $subscriptionCheck['status'],
+            'current_employee_count' => $subscriptionCheck['current_count'] ?? 0,
+            'employee_limit' => $subscriptionCheck['limit'] ?? 0,
+            'remaining_slots' => $subscriptionCheck['status'] ? 
+                ($subscriptionCheck['limit'] - $subscriptionCheck['current_count']) : 0,
+            'message' => $subscriptionCheck['message'] ?? null,
+            'subscription' => $subscriptionCheck['subscription'] ?? null
+        ]);
     }
 }
