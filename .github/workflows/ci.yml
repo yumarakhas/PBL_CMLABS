@@ -30,6 +30,13 @@ jobs:
         run: |
           cd hris-backend
           composer install --no-interaction --prefer-dist --optimize-autoloader
+      - name: Copy .env file
+        run: |
+          cp hris-backend/.env.example hris-backend/.env
+      - name: Generate application key
+        run: |
+          cd hris-backend
+          php artisan key:generate
       - name: Run Laravel migrations
         run: |
           cd hris-backend
