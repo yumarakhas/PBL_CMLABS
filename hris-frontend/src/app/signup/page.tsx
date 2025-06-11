@@ -33,15 +33,12 @@ export default function SignUpPage() {
     setMessage("");
 
     try {
-      await axios.post(
-        process.env.NEXT_PUBLIC_API_BASE_URL + "/admin/register",
-        {
-          name: `${form.firstName} ${form.lastName}`,
-          email: form.email,
-          password: form.password,
-          password_confirmation: form.confirmPassword,
-        }
-      );
+      await axios.post("/admin/register", {
+        name: `${form.firstName} ${form.lastName}`,
+        email: form.email,
+        password: form.password,
+        password_confirmation: form.confirmPassword,
+      });
 
       setMessage("Registration successful! Redirecting to Sign In...");
       setTimeout(() => router.push("/signin"), 2000);
