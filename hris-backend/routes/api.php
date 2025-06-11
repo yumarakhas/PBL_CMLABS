@@ -67,6 +67,7 @@ Route::prefix('checkclocks')->group(function () {
     // Additional routes for approval
     Route::put('/{id}/approve', [CheckClocksController::class, 'approve']);
     Route::put('/{id}/reject', [CheckClocksController::class, 'reject']);
+});
 
 // Rute publik lainnya
 Route::get('/package-plans', [PackagePlanController::class, 'index']);
