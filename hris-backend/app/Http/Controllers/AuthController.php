@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
 
-class AdminAuthController extends Controller
+class AuthController extends Controller
 {
     public function register(Request $request)
     {
@@ -43,18 +43,15 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'identifier' => 'required|string',
-            'password'   => 'required|string',
+            'email'    => 'required|email',
+            'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Cari admin berdasarkan email atau phone number
-        $admin = Admin::where('email', $request->identifier)
-                    ->orWhere('phone_number', $request->identifier)
-                    ->first();
+        $admin = Admin::where('email', $request->email)->first();
 
         if (!$admin || !Hash::check($request->password, $admin->password)) {
             throw ValidationException::withMessages([
@@ -62,21 +59,27 @@ class AdminAuthController extends Controller
             ]);
         }
 
-        // Generate token
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         return response()->json([
             'token' => $token,
-            'admin' => $admin
+            'admin' => [
+                'id'         => $admin->id,
+                'first_name' => $admin->first_name,
+                'email'      => $admin->email,
+                'photo'      => $admin->photo,
+            ]
         ]);
     }
 
+
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        if ($request->user()) {
+            $request->user()->currentAccessToken()->delete(); // Menghapus token saat ini
+            return response()->json(['message' => 'Logged out successfully']);
+        }
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+        return response()->json(['message' => 'Not authenticated'], 401);
     }
 }
