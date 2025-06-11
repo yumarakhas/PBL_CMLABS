@@ -17,4 +17,4 @@ sed -i \
   -e "s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASS/" \
   "$ENV_FILE"
 
-echo "Backend .env DB config updated for Docker Compose!"
+echo "Backend .env DB config updated for Docker!"
