@@ -63,7 +63,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 py-10">
+      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 sm:px-12 md:px-16 lg:px-20 py-10">
         <div>
           <div className="flex justify-between items-center mb-8">
             <Image src="/assets/img/LogoHRIS.png" alt="HRIS Logo" width={90} height={90} />

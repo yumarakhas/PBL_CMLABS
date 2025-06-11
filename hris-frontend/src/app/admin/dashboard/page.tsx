@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FaUserClock, FaUserCheck, FaUserPlus, FaUserTimes } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 import {
@@ -13,6 +14,8 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import Cookies from 'js-cookie';
+
 
 // Warna untuk Pie Chart
 const COLORS = ['#2E7D32', '#FF9800', '#EF4444'];
@@ -57,7 +60,23 @@ const attendanceList = [
 ];
 
 function AdminDashboardPage() {
+  const router = useRouter();
   const [selectedMonth, setSelectedMonth] = useState(monthOptions[0]);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (!token) {
+      router.replace('/signin');
+    } else {
+      setIsAuthorized(true);
+    }
+  }, [router]);
+
+
+  if (isAuthorized === null) {
+    return <div className="text-center py-10">Loading...</div>;
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -76,7 +95,7 @@ function AdminDashboardPage() {
           <div className="flex justify-between items-center mb-10">
             <div>
               <p className="font-bold text-m text-gray-400">Employee Statistics</p>
-              <h2 className="font-bold text-lg"> Current Number of Employees</h2>
+              <h2 className="font-bold text-lg">Current Number of Employees</h2>
             </div>
             <Dropdown selected={selectedMonth} setSelected={setSelectedMonth} />
           </div>
@@ -92,7 +111,6 @@ function AdminDashboardPage() {
         {/* Employee Status */}
         <div className="bg-white rounded-lg p-6 shadow">
           <div className="flex justify-between items-center mb-10">
-            
             <div>
               <p className="font-bold text-m text-gray-400">Employee Statistics</p>
               <h2 className="font-bold text-lg">Employee Status</h2>
@@ -216,5 +234,5 @@ function Dropdown({ selected, setSelected }: { selected: string, setSelected: (v
   );
 }
 
-// Export dinamis
+// Export dinamis (hindari SSR)
 export default dynamic(() => Promise.resolve(AdminDashboardPage), { ssr: false });
