@@ -188,41 +188,77 @@ return new class extends Migration
             $table->string('status');
         });
 
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
+        // Schema::create('personal_access_tokens', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->morphs('tokenable');
+        //     $table->string('name');
+        //     $table->string('token', 64)->unique();
+        //     $table->text('abilities')->nullable();
+        //     $table->timestamp('last_used_at')->nullable();
+        //     $table->timestamp('expires_at')->nullable();
+        //     $table->timestamps();
+        // });
+
+        // Tabel Package Plans
+        Schema::create('packages', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
             $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->integer('price');
+            $table->string('description');
             $table->timestamps();
         });
 
-        // Tabel Package Plans
-        Schema::create('package_plans', function (Blueprint $table) {
+        Schema::create('package_benefits', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('subtitle')->nullable();
-            $table->json('features');
-            $table->unsignedBigInteger('price');
+            $table->foreignId('package_id')->constrained('packages')->onDelete('cascade');
+            $table->unsignedBigInteger('max_branches');
+            $table->unsignedBigInteger('max_employees');
+            $table->unsignedInteger('access_duration_days');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
 
         // Tabel Checkout
-        Schema::create('checkouts', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('plan');
-            $table->unsignedBigInteger('company_id');
-            $table->integer('branches')->default(0);
-            $table->integer('addon_employees')->default(0);
+            $table->foreignId('package_benefits_id')->constrained('package_benefits')->onDelete('cascade');
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+
+            // Add the missing fields that are being sent from frontend
+            $table->string('company_name');
+            $table->string('email');
+            $table->string('phone_number');
+
+            $table->integer('add_branch')->nullable()->default(0);
+            $table->integer('add_employees')->nullable()->default(0);
+            $table->unsignedBigInteger('duration_days');
             $table->bigInteger('subtotal');
             $table->bigInteger('tax');
             $table->bigInteger('total');
             $table->string('status')->default('pending'); // pending, paid, failed, etc
+            $table->string('payment_method')->nullable();
+            $table->string('payment_reference')->nullable(); // dari Xendit misal
+            $table->timestamp('paid_at')->nullable();
             $table->timestamps();
+        });
 
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+        Schema::create('subscriptions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->foreignId('package_id')->constrained();
+            $table->unsignedBigInteger('extra_branch')->default(0); // dari orders
+            $table->unsignedBigInteger('extra_employee')->default(0);
+            $table->date('starts_at');
+            $table->date('ends_at');
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::table('orders', function (Blueprint $table) {
+            
+            $table->dropForeign(['package_benefits_id']);
+            // $table->renameColumn('package_benefits_id', 'package_benefits_id');
+            $table->foreign('package_benefits_id')->references('id')->on('package_benefits')->onDelete('cascade');
         });
     }
 
@@ -241,13 +277,18 @@ return new class extends Migration
         Schema::dropIfExists('check_clock_setting_times_table');
         Schema::dropIfExists('check_clocks_table');
         Schema::dropIfExists('salaries');
-        Schema::dropIfExists('personal_access_tokens');
+        // Schema::dropIfExists('personal_access_tokens');
         Schema::dropIfExists('employee_achievements');
         Schema::dropIfExists('company');
         Schema::dropIfExists('branch');
         Schema::dropIfExists('division');
         Schema::dropIfExists('position');
-        Schema::dropIfExists('package_plans');
+        Schema::dropIfExists('packages');
+        Schema::dropIfExists('package_benefits');
+        Schema::dropIfExists('orders');
+        Schema::dropIfExists('subscriptions');
         Schema::dropIfExists('checkouts');
+        Schema::dropIfExists('payments');
+        Schema::dropIfExists('orders');
     }
 };
