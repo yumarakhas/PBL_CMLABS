@@ -548,7 +548,7 @@ export default function Home() {
                   className="object-contain"
                 />
               </div>
-              <p className="text-gray-600 mt-4 font-medium text-center">PT cmlabs Indonesia Digital</p>
+              <p className="text-gray-600 mt-4 font-medium text-center">PT CM Labs Indonesia Digital</p>
             </div>
           </div>        
         </div>

@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             PackagesSeeder::class,
             PackageBenefitsSeeder::class,
+
             // BranchesSeeder::class,
             // DivisionsSeeder::class,
             // PositionsSeeder::class,
