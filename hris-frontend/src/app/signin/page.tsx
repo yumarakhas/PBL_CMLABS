@@ -42,7 +42,7 @@ export default function SignInPage() {
       </div>
 
       {/* Kanan - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-[#ffffff] px-6 sm:px-12 md:px-16 lg:px-20 py-10">
+      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-[#ffffff] px-4 sm:px-6 md:px-10 lg:px-12 py-8">
         <div>
           <div className="flex justify-between items-center mb-8">
             <Image src="/assets/img/LogoHRIS.png" alt="Logo" width={90} height={90} />
@@ -51,7 +51,7 @@ export default function SignInPage() {
             </Link>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3">Sign in</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">Sign in</h1>
           <p className="text-gray-600 mb-6">
             Welcome back to HRIS cmlabs! Manage everything with ease.
           </p>
@@ -115,21 +115,21 @@ export default function SignInPage() {
 
             <button
               type="submit"
-              className="w-full bg-gray-800 text-white py-4 rounded font-semibold hover:bg-gray-900 transition"
+              className="w-full bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition text-sm"
             >
               SIGN IN
             </button>
 
             <button
               type="button"
-              className="w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Sign in with Google
             </button>
 
             <Link
               href="/signin/idemployee"
-              className="block text-center w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="block text-center w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Sign in with ID Employee
             </Link>
