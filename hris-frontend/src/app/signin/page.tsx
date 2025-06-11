@@ -21,7 +21,7 @@ export default function SignInPage() {
 
     try {
       const res = await loginAdmin(identifier, password);
-      localStorage.setItem("adminToken", res.token);
+      localStorage.setItem("admin_auth_token", res.token);
       router.push("/admin/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");
@@ -45,8 +45,16 @@ export default function SignInPage() {
       <div className="w-full lg:w-1/2 flex flex-col justify-between bg-[#ffffff] px-6 sm:px-12 md:px-16 lg:px-20 py-10">
         <div>
           <div className="flex justify-between items-center mb-8">
-            <Image src="/assets/img/LogoHRIS.png" alt="Logo" width={90} height={90} />
-            <Link href="/signup" className="text-blue-600 font-semibold text-sm underline">
+            <Image
+              src="/assets/img/LogoHRIS.png"
+              alt="Logo"
+              width={90}
+              height={90}
+            />
+            <Link
+              href="/signup"
+              className="text-blue-600 font-semibold text-sm underline"
+            >
               Try for free!
             </Link>
           </div>
@@ -60,7 +68,9 @@ export default function SignInPage() {
             {error && <p className="text-red-500">{error}</p>}
 
             <div>
-              <label className="block text-sm font-medium mb-1">Email / Phone</label>
+              <label className="block text-sm font-medium mb-1">
+                Email / Phone
+              </label>
               <input
                 type="text"
                 value={identifier}
@@ -73,7 +83,9 @@ export default function SignInPage() {
 
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
-              <div className="relative"> {/* Added relative positioning */}
+              <div className="relative">
+                {" "}
+                {/* Added relative positioning */}
                 <input
                   type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
                   value={password}
@@ -93,7 +105,10 @@ export default function SignInPage() {
             </div>
 
             <div className="flex justify-between items-center text-sm">
-              <label htmlFor="remember" className="flex items-center cursor-pointer">
+              <label
+                htmlFor="remember"
+                className="flex items-center cursor-pointer"
+              >
                 <input type="checkbox" id="remember" className="peer hidden" />
                 <div className="w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all duration-200">
                   <svg
@@ -103,7 +118,11 @@ export default function SignInPage() {
                     strokeWidth="3"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <span className="ml-3 text-sm">Remember Me</span>

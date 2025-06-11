@@ -6,6 +6,21 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Add a request interceptor to include Authorization header if token exists
+api.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("admin_auth_token");
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Admin Login API
 export const loginAdmin = async (identifier: string, password: string) => {
   const response = await api.post("/admin/login", { identifier, password });

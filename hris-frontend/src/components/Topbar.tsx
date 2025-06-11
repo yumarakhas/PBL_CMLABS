@@ -3,6 +3,7 @@
 import { FiBell, FiSearch } from "react-icons/fi";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import api from "@/lib/api";
 import Link from "next/link";
 
 interface UserProfile {
@@ -24,16 +25,13 @@ export default function Topbar({ title }: { title: string }) {
     : "Guest";
 
   useEffect(() => {
-    import("@/lib/api").then(({ default: api }) => {
-      api
-        .get("/profile", { withCredentials: true })
-        .then((res) => setUser(res.data))
-        .catch(() => setUser({}));
-    });
+    api
+      .get<UserProfile>("/profile", { withCredentials: true })
+      .then((res: { data: UserProfile }) => setUser(res.data))
+      .catch(() => setUser({}));
   }, []);
 
   const handleLogout = async () => {
-    const api = (await import("@/lib/api")).default;
     await api.post("/logout", {}, { withCredentials: true });
     router.push("/signin");
   };
