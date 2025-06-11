@@ -8,9 +8,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v3
 
       - name: Deploy, build, and run on server via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -20,12 +19,19 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ./hris
+            git checkout origin/patch
             git fetch origin patch
 
             # Setting the environment variables
             bash scripts/setup-backend-env.sh
 
-            # Stopping and removing existing containers, building, and starting new containers
+            # Stopping and removing all containers, including orphaned, to avoid name conflict
             docker compose down --remove-orphans
-            docker compose build --no-cache
+
+            # Force remove the database container without the volume to avoid data loss
+            docker rm -f hris-frontend || true
+            docker rm -f hris-backend || true
+            docker rm -f hris-database || true
+
+            # Building and starting the containers
             docker compose up -d
