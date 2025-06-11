@@ -1,137 +1,191 @@
+"use client";
+
+import { useState } from "react";
+import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignUpPage() {
+  const router = useRouter();
+
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState<any>({});
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    setMessage("");
+
+    try {
+      await axios.post("http://localhost:8000/api/admin/register", {
+        name: `${form.firstName} ${form.lastName}`,
+        email: form.email,
+        password: form.password,
+        password_confirmation: form.confirmPassword,
+      });
+
+      setMessage("Registration successful! Redirecting to Sign In...");
+      setTimeout(() => router.push("/signin"), 2000);
+    } catch (error: any) {
+      if (error.response && error.response.data.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setMessage("Registration failed.");
+      }
+    }
+  };
+
+  const handleGoogleSignup = () => {
+    window.location.href = "http://localhost:8000/auth/google";
+  };
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
-      {/* Kiri - Gambar */}
+      {/* Gambar */}
       <div className="w-full lg:w-1/2 bg-[#f0f4ff] flex items-center justify-center p-8">
-        <Image
-          src="/assets/img/signup.png"
-          alt="Signup Illustration"
-          width={700}
-          height={700}
-          className="object-contain max-w-full h-auto"
-        />
+        <Image src="/assets/img/signup.png" alt="Signup Illustration" width={700} height={700} />
       </div>
 
-      {/* Kanan - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-[#ffffff] px-6 sm:px-12 md:px-16 lg:px-20 py-10">
-        {/* Konten Atas */}
+      {/* Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 py-10">
         <div>
           <div className="flex justify-between items-center mb-8">
-            <Image
-              src="/assets/img/LogoHRIS.png"
-              alt="HRIS Logo"
-              width={90}
-              height={90}
-            />
-            <Link
-              href="/signin"
-              className="text-blue-600 font-semibold text-sm underline"
-            >
+            <Image src="/assets/img/LogoHRIS.png" alt="HRIS Logo" width={90} height={90} />
+            <Link href="/signin" className="text-blue-600 font-semibold text-sm underline">
               Sign In here!
             </Link>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3">Sign Up</h1>
-          <p className="text-gray-600 mb-6">
-            Create your account and streamline your employee management.
-          </p>
+          <h1 className="text-3xl font-bold mb-3">Sign Up</h1>
+          <p className="text-gray-600 mb-6">Create your account as admin.</p>
 
-          <form className="space-y-6">
-            {/* Nama Depan & Belakang */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-              <div className="w-full sm:w-1/2">
+          {message && <p className="text-green-600 mb-4">{message}</p>}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="flex gap-4">
+              <div className="w-full">
                 <label className="block text-sm font-medium mb-1">First Name</label>
                 <input
+                  name="firstName"
                   type="text"
+                  value={form.firstName}
+                  onChange={handleChange}
                   placeholder="Enter your first name"
                   className="w-full border border-gray-400 p-3 rounded"
                 />
               </div>
-              <div className="w-full sm:w-1/2">
+              <div className="w-full">
                 <label className="block text-sm font-medium mb-1">Last Name</label>
                 <input
+                  name="lastName"
                   type="text"
+                  value={form.lastName}
+                  onChange={handleChange}
                   placeholder="Enter your last name"
                   className="w-full border border-gray-400 p-3 rounded"
                 />
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium mb-1">Email</label>
               <input
+                name="email"
                 type="email"
+                value={form.email}
+                onChange={handleChange}
                 placeholder="Enter your email"
                 className="w-full border border-gray-400 p-3 rounded"
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email[0]}</p>}
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                className="w-full border border-gray-400 p-3 rounded"
-              />
+              <div className="relative">
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className="w-full border border-gray-400 p-3 rounded pr-10"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3 text-gray-600"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
+                </button>
+              </div>
+              {errors.password && <p className="text-red-500 text-sm">{errors.password[0]}</p>}
             </div>
 
-            {/* Konfirmasi Password */}
             <div>
               <label className="block text-sm font-medium mb-1">Confirm Password</label>
-              <input
-                type="password"
-                placeholder="Enter your confirm password"
-                className="w-full border border-gray-400 p-3 rounded"
-              />
-            </div>
-
-            {/* Checkbox Bulat */}
-            <div className="flex items-center gap-3 mb-7">
-              <label htmlFor="terms" className="flex items-center cursor-pointer">
+              <div className="relative">
                 <input
-                  type="checkbox"
-                  id="terms"
-                  className="peer hidden"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Enter your confirm password"
+                  className="w-full border border-gray-400 p-3 rounded pr-10"
                 />
-                <div className="w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all duration-200">
-                  <svg
-                    className="w-3 h-3 text-white hidden peer-checked:block"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="ml-3 text-sm">I agree with the terms of use of HRIS</span>
-              </label>
+                <button
+                  type="button"
+                  className="absolute right-3 top-3 text-gray-600"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff size={25} /> : <Eye size={25} />}
+                </button>
+              </div>
             </div>
 
-            {/* Tombol Signup */}
+            <div className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                id="terms"
+                required
+                className="w-5 h-5 appearance-none border-2 border-gray-400 rounded-full checked:bg-blue-600 checked:border-transparent transition duration-200"
+              />
+              <label htmlFor="terms">I agree with the terms of use of HRIS</label>
+            </div>
+
             <button
               type="submit"
-              className="w-full bg-gray-800 text-white py-5 rounded font-semibold hover:bg-gray-900 transition mt-8"
+              className="w-full bg-gray-800 text-white py-4 rounded font-semibold hover:bg-gray-900 transition"
             >
               SIGN UP
             </button>
 
-            {/* Tombol Google */}
             <button
               type="button"
-              className="w-full border border-black py-5 rounded font-semibold hover:bg-gray-100 transition"
+              onClick={handleGoogleSignup}
+              className="w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
             >
               Sign up with Google
             </button>
           </form>
         </div>
 
-        {/* Footer */}
         <div className="pt-6">
           <hr className="my-9" />
           <p className="text-center text-sm">
