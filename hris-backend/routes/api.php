@@ -2,8 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CheckClockSettingController;
-use App\Http\Controllers\CheckClockController;
+use App\Http\Controllers\CheckClockSettingTimesController;
+use App\Http\Controllers\CheckClockSettingsController;
+use App\Http\Controllers\CheckClocksController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LettersController;
 use App\Http\Controllers\LetterFormatsController;
@@ -13,6 +14,7 @@ use App\Models\Letter_formats as ModelsLetter_formats; // Ini sepertinya typo, b
 use App\Http\Controllers\PackagePlanController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CheckClockExportController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CompanyDetailsController;
@@ -22,6 +24,9 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TopBarController;
 use App\Http\Controllers\Auth\EmployeeAuthController; // Pastikan ini di-import
 
+Route::get('companies', [CompanyController::class, 'index']);
+Route::get('/company', [CompanyController::class, 'show']);
+Route::get('/position-branch-company', [App\Http\Controllers\DropDownController::class, 'getPositionBranchCompany']);
 
 // --- Rute untuk Admin ---
 Route::prefix('admin')->group(function () {
@@ -48,6 +53,30 @@ Route::prefix('admin')->group(function () {
     });
 });
 
+// API Check Clock
+// Route untuk CheckClockSetting (pengaturan shift)
+// Route::apiResource('checkclocksettings', CheckClockSettingsController::class);
+
+// Route untuk CheckClockSettingTime (jam shift)
+// Route::apiResource('checkclocksettingtimes', CheckClockSettingTimesController::class);
+
+Route::apiResource('work-settings', CheckClockSettingsController::class, [
+    'except' => ['edit', 'create'] // Tidak perlu untuk API
+]);
+
+Route::get('/checkclocks/export', [CheckClockExportController::class, 'export']);
+
+// Route untuk CheckClock (absensi)
+Route::prefix('checkclocks')->group(function () {
+    Route::get('/', [CheckClocksController::class, 'index']);
+    Route::post('/', [CheckClocksController::class, 'store']);
+    Route::get('/{id}', [CheckClocksController::class, 'show']);
+    Route::put('/{id}', [CheckClocksController::class, 'update']);
+    Route::delete('/{id}', [CheckClocksController::class, 'destroy']);
+    
+    // Additional routes for approval
+    Route::put('/{id}/approve', [CheckClocksController::class, 'approve']);
+    Route::put('/{id}/reject', [CheckClocksController::class, 'reject']);
 
 Route::get('/package-plans', [PackagePlanController::class, 'index']);
 Route::get('/companies', [CompanyController::class, 'index']); // Mengambil daftar perusahaan

@@ -148,31 +148,53 @@ return new class extends Migration
         });
 
 
-        Schema::create('check_clock_setting', function (Blueprint $table) {
+        Schema::create('check_clock_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->integer('type');
+            // $table->string('name');
+            // $table->enum('type', ['WFO', 'WFA']);
+            $table->decimal('latitude', 10, 8)->nullable(); // lokasi titik check-in
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->integer('radius')->nullable(); // dalam meter
             $table->timestamps();
             $table->softDeletes();
         });
 
         Schema::create('check_clock_setting_times', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ck_setting_id')->constrained('check_clock_setting')->onDelete('cascade');
-            $table->date('day');
-            $table->time('clock_in');
-            $table->time('clock_out');
-            $table->time('break_start');
-            $table->time('break_end');
+            $table->foreignId('ck_settings_id')->constrained('check_clock_settings')->onDelete('cascade');
+            $table->enum('day', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+            
+            // Pengaturan waktu clock in
+            $table->time('clock_in_start'); // jam 07:00 - waktu paling awal bisa clock in
+            $table->time('clock_in_end'); // jam 09:00 - waktu paling akhir bisa clock in
+            $table->time('clock_in_on_time_limit'); // jam 08:00 - setelah ini dianggap Late
+            
+            // Pengaturan waktu clock out
+            $table->time('clock_out_start'); // jam 17:00 - waktu paling awal bisa clock out
+            $table->time('clock_out_end'); // jam 19:00 - waktu paling akhir bisa clock out
+            
+            $table->boolean('work_day')->default(true); // apakah hari kerja?
             $table->timestamps();
             $table->softDeletes();
         });
 
         Schema::create('check_clocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->integer('check_clock_type');
-            $table->time('check_clock_time');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('ck_settings_id')->nullable()->constrained('check_clock_settings')->onDelete('set null');
+            $table->enum('check_clock_type', ['check-in', 'check-out', 'annual-leave', 'sick-leave', 'absent']);
+            $table->date('check_clock_date'); // tanggal presensi
+            $table->time('check_clock_time'); // waktu presensi
+            $table->time('check_out_time');
+            $table->date('start_date')->nullable(); // Add start date for leave periods
+            $table->date('end_date')->nullable();
+            $table->enum('status', ['On Time', 'Late', 'Absent', 'Annual Leave', 'Sick Leave', 'Waiting Approval', '-'])->nullable();
+            $table->boolean('approved')->nullable(); // untuk absensi manual yang perlu persetujuan
+            $table->string('location')->nullable(); // nama lokasi (jika WFO)
+            $table->string('address')->nullable(); // alamat lengkap (jika tersedia)
+            $table->decimal('latitude', 10, 8)->nullable(); // lokasi aktual
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->string('photo')->nullable(); // foto bukti presensi (jika pakai)
             $table->timestamps();
             $table->softDeletes();
         });
@@ -182,10 +204,10 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->integer('type');
             $table->float('rate');
-            $table->date('efective_date');
+            $table->date('effective_date');
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
-            $table->string('status');
         });
 
         // Schema::create('personal_access_tokens', function (Blueprint $table) {
@@ -267,22 +289,26 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('checkouts');
+        Schema::dropIfExists('package_plans');
+        Schema::dropIfExists('personal_access_tokens');
+        Schema::dropIfExists('salaries');
+        Schema::dropIfExists('check_clocks');
+        Schema::dropIfExists('check_clock_setting_times');
+        Schema::dropIfExists('check_clock_settings');
+        Schema::dropIfExists('letters');
+        Schema::dropIfExists('letter_formats');
+        Schema::dropIfExists('achievements');
+        Schema::dropIfExists('sessions');
         Schema::dropIfExists('admin');
         Schema::dropIfExists('employees');
+        Schema::dropIfExists('positions');
+        Schema::dropIfExists('divisions');
+        Schema::dropIfExists('branches'); 
         Schema::dropIfExists('users');
-        Schema::dropIfExists('sessions');
-        Schema::dropIfExists('letter_formats_table');
-        Schema::dropIfExists('letters_table');
-        Schema::dropIfExists('check_clock_setting_table');
-        Schema::dropIfExists('check_clock_setting_times_table');
-        Schema::dropIfExists('check_clocks_table');
-        Schema::dropIfExists('salaries');
+        Schema::dropIfExists('companies');
         // Schema::dropIfExists('personal_access_tokens');
         Schema::dropIfExists('employee_achievements');
-        Schema::dropIfExists('company');
-        Schema::dropIfExists('branch');
-        Schema::dropIfExists('division');
-        Schema::dropIfExists('position');
         Schema::dropIfExists('packages');
         Schema::dropIfExists('package_benefits');
         Schema::dropIfExists('orders');
