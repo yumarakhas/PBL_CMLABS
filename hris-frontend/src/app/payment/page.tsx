@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import api from "@/lib/api";
 
 const packagePlans = [
   { title: "Free Trial", price: 0 },
@@ -11,6 +12,7 @@ const packagePlans = [
   { title: "Enterprise", price: 7200000 },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const paymentMethods = [
   { label: "Select Payment Method", value: "" },
   { label: "Virtual Account - BCA", value: "va_bca" },
@@ -27,16 +29,18 @@ const paymentOptions = {
   "Credit / Debit Card": ["Visa", "Mastercard", "JCB"],
 };
 
-
-
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const [isShopeePaySelected, setIsShopeePaySelected] = useState(false);
   const [plan, setPlan] = useState("Basic");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [price, setPrice] = useState(0);
   const [branches, setBranches] = useState(0);
   const [addonEmployees, setAddonEmployees] = useState(0);
-  const [companies, setCompanies] = useState({ name: "", email: "", phone: "" });
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [companies, setCompanies] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
   const [countdown, setCountdown] = useState(24 * 60 * 60);
   const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -46,14 +50,15 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setPlan(searchParams.get("plan") ?? "Basic");
-    setPrice(parseInt(searchParams.get("price") ?? "0"));
-    setBranches(parseInt(searchParams.get("branches") ?? "0"));
-    setAddonEmployees(parseInt(searchParams.get("addonEmployees") ?? "0"));
+    setPrice(Number(searchParams.get("price") ?? "0"));
+    setBranches(Number(searchParams.get("branches") ?? "0"));
+    setAddonEmployees(Number(searchParams.get("addonEmployees") ?? "0"));
 
     // Fetch company from API
-    fetch("http://localhost:8000/api/companies")
-      .then((res) => res.json())
-      .then((data) => {
+    api
+      .get("/companies")
+      .then((res) => {
+        const data = res.data;
         if (Array.isArray(data) && data.length > 0) {
           setCompanies({
             name: data[0].name,
@@ -127,7 +132,9 @@ export default function CheckoutPage() {
           ×
         </button>
 
-        <h1 className="text-2xl font-bold text-center mb-2">Checkout Payment</h1>
+        <h1 className="text-2xl font-bold text-center mb-2">
+          Checkout Payment
+        </h1>
         <p className="text-sm text-gray-600 text-center mb-6">
           Please complete your payment!
         </p>
@@ -138,17 +145,50 @@ export default function CheckoutPage() {
         </div>
 
         <div className="bg-gray-50 border rounded-md p-4 mb-6">
-          <h2 className="text-lg font-semibold mb-2 text-black">Order Summary</h2>
+          <h2 className="text-lg font-semibold mb-2 text-black">
+            Order Summary
+          </h2>
           <ul className="text-sm text-black space-y-1">
-            <li className="flex justify-between"><span>Package</span><span>{plan}</span></li>
-            <li className="flex justify-between"><span>Company Name</span><span>{companies.name}</span></li>
-            <li className="flex justify-between"><span>Email</span><span>{companies.email}</span></li>
-            <li className="flex justify-between"><span>Phone Number</span><span>{companies.phone}</span></li>
-            <li className="flex justify-between"><span>Base Price</span><span>Rp {basePrice.toLocaleString("id-ID")}</span></li>
-            {branches > 0 && <li className="flex justify-between"><span>Add Branch</span><span>Rp {branchPrice.toLocaleString("id-ID")}</span></li>}
-            {addonEmployees > 0 && <li className="flex justify-between"><span>Add Employee</span><span>Rp {employeePrice.toLocaleString("id-ID")}</span></li>}
-            <li className="flex justify-between"><span>Tax (10%)</span><span>Rp {tax.toLocaleString("id-ID")}</span></li>
-            <li className="flex justify-between font-bold pt-2 border-t"><span>Total</span><span>Rp {totalFinal.toLocaleString("id-ID")}</span></li>
+            <li className="flex justify-between">
+              <span>Package</span>
+              <span>{plan}</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Company Name</span>
+              <span>{companies.name}</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Email</span>
+              <span>{companies.email}</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Phone Number</span>
+              <span>{companies.phone}</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Base Price</span>
+              <span>Rp {basePrice.toLocaleString("id-ID")}</span>
+            </li>
+            {branches > 0 && (
+              <li className="flex justify-between">
+                <span>Add Branch</span>
+                <span>Rp {branchPrice.toLocaleString("id-ID")}</span>
+              </li>
+            )}
+            {addonEmployees > 0 && (
+              <li className="flex justify-between">
+                <span>Add Employee</span>
+                <span>Rp {employeePrice.toLocaleString("id-ID")}</span>
+              </li>
+            )}
+            <li className="flex justify-between">
+              <span>Tax (10%)</span>
+              <span>Rp {tax.toLocaleString("id-ID")}</span>
+            </li>
+            <li className="flex justify-between font-bold pt-2 border-t">
+              <span>Total</span>
+              <span>Rp {totalFinal.toLocaleString("id-ID")}</span>
+            </li>
           </ul>
         </div>
 
@@ -167,7 +207,6 @@ export default function CheckoutPage() {
               ? `Method: ${selectedCategory} - ${selectedMethod}`
               : "Select Payment Method"}
           </button>
-          
         </div>
 
         {isShopeePaySelected && (
@@ -178,11 +217,19 @@ export default function CheckoutPage() {
             <ol className="text-sm text-blue-700 space-y-2 list-decimal pl-5">
               <li>Buka aplikasi Shopee di ponsel Anda.</li>
               <li>Masuk ke menu ShopeePay di halaman utama aplikasi.</li>
-              <li>Pilih opsi "Scan QR Code".</li>
-              <li>Arahkan kamera ponsel Anda ke QR Code yang ditampilkan di layar.</li>
-              <li>Pastikan jumlah pembayaran sudah sesuai, lalu konfirmasi pembayaran.</li>
+              <li>Pilih opsi &quot;Scan QR Code&quot;.</li>
+              <li>
+                Arahkan kamera ponsel Anda ke QR Code yang ditampilkan di layar.
+              </li>
+              <li>
+                Pastikan jumlah pembayaran sudah sesuai, lalu konfirmasi
+                pembayaran.
+              </li>
               <li>Masukkan PIN ShopeePay untuk menyelesaikan transaksi.</li>
-              <li>Pembayaran Anda berhasil! Periksa status pembayaran di aplikasi Shopee.</li>
+              <li>
+                Pembayaran Anda berhasil! Periksa status pembayaran di aplikasi
+                Shopee.
+              </li>
             </ol>
           </div>
         )}
@@ -200,42 +247,52 @@ export default function CheckoutPage() {
       {showModal && (
         <div className="fixed inset-0 bg-gray-100 bg-opacity-90 flex items-center justify-center z-50">
           <div className="bg-white w-full max-w-md rounded-lg shadow-md p-6 overflow-auto max-h-[80vh]">
-            <h2 className="text-xl font-bold mb-4 text-center">Select Payment Method</h2>
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Select Payment Method
+            </h2>
 
-            {Object.keys(paymentOptions).map((category) => (
-              <div key={category} className="mb-4">
-                <button
-                  onClick={() =>
-                    setSelectedCategory(selectedCategory === category ? "" : category)
-                  }
-                  className="w-full flex justify-between items-center text-left text-sm font-medium text-gray-700 bg-gray-200 p-2 rounded-lg hover:bg-gray-300"
-                >
-                  <span>{category}</span>
-                  <span>{selectedCategory === category ? "-" : "+"}</span>
-                </button>
-                {selectedCategory === category && (
-                  <div className="mt-2 ml-4 space-y-2">
-                    {paymentOptions[category].map((method) => (
-                      <button
-                        key={method}
-                        onClick={() => {
-                          setSelectedMethod(method);
-                          setShowModal(false);
-                          setIsShopeePaySelected(method === "ShopeePay"); // Tambahkan di sini
-                        }}
-                        className={`block w-full text-left p-2 rounded-md text-sm ${
-                          selectedMethod === method
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 hover:bg-gray-200"
-                        }`}
-                      >
-                        {method}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+            {Object.keys(paymentOptions).map((category) => {
+              const methods =
+                paymentOptions[category as keyof typeof paymentOptions];
+              return (
+                <div key={category} className="mb-4">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedCategory(
+                        selectedCategory === category ? "" : category
+                      )
+                    }
+                    className="w-full flex justify-between items-center text-left text-sm font-medium text-gray-700 bg-gray-200 p-2 rounded-lg hover:bg-gray-300"
+                  >
+                    <span>{category}</span>
+                    <span>{selectedCategory === category ? "-" : "+"}</span>
+                  </button>
+                  {selectedCategory === category && (
+                    <div className="mt-2 ml-4 space-y-2">
+                      {methods.map((method) => (
+                        <button
+                          type="button"
+                          key={method}
+                          onClick={() => {
+                            setSelectedMethod(method);
+                            setShowModal(false);
+                            setIsShopeePaySelected(method === "ShopeePay");
+                          }}
+                          className={`block w-full text-left p-2 rounded-md text-sm ${
+                            selectedMethod === method
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-100 hover:bg-gray-200"
+                          }`}
+                        >
+                          {method}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
             <div className="flex justify-between mt-6">
               <button
@@ -249,5 +306,13 @@ export default function CheckoutPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }

@@ -33,12 +33,15 @@ export default function SignUpPage() {
     setMessage("");
 
     try {
-      await axios.post("http://localhost:8000/api/admin/register", {
-        name: `${form.firstName} ${form.lastName}`,
-        email: form.email,
-        password: form.password,
-        password_confirmation: form.confirmPassword,
-      });
+      await axios.post(
+        process.env.NEXT_PUBLIC_API_BASE_URL + "/admin/register",
+        {
+          name: `${form.firstName} ${form.lastName}`,
+          email: form.email,
+          password: form.password,
+          password_confirmation: form.confirmPassword,
+        }
+      );
 
       setMessage("Registration successful! Redirecting to Sign In...");
       setTimeout(() => router.push("/signin"), 2000);
@@ -52,22 +55,37 @@ export default function SignUpPage() {
   };
 
   const handleGoogleSignup = () => {
-    window.location.href = "http://localhost:8000/auth/google";
+    window.location.href =
+      (process.env.NEXT_PUBLIC_API_BASE_URL?.replace("/api", "") ?? "") +
+      "/auth/google";
   };
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Gambar */}
       <div className="w-full lg:w-1/2 bg-[#f0f4ff] flex items-center justify-center p-8">
-        <Image src="/assets/img/signup.png" alt="Signup Illustration" width={700} height={700} />
+        <Image
+          src="/assets/img/signup.png"
+          alt="Signup Illustration"
+          width={700}
+          height={700}
+        />
       </div>
 
       {/* Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 py-10">
         <div>
           <div className="flex justify-between items-center mb-8">
-            <Image src="/assets/img/LogoHRIS.png" alt="HRIS Logo" width={90} height={90} />
-            <Link href="/signin" className="text-blue-600 font-semibold text-sm underline">
+            <Image
+              src="/assets/img/LogoHRIS.png"
+              alt="HRIS Logo"
+              width={90}
+              height={90}
+            />
+            <Link
+              href="/signin"
+              className="text-blue-600 font-semibold text-sm underline"
+            >
               Sign In here!
             </Link>
           </div>
@@ -80,7 +98,9 @@ export default function SignUpPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="flex gap-4">
               <div className="w-full">
-                <label className="block text-sm font-medium mb-1">First Name</label>
+                <label className="block text-sm font-medium mb-1">
+                  First Name
+                </label>
                 <input
                   name="firstName"
                   type="text"
@@ -91,7 +111,9 @@ export default function SignUpPage() {
                 />
               </div>
               <div className="w-full">
-                <label className="block text-sm font-medium mb-1">Last Name</label>
+                <label className="block text-sm font-medium mb-1">
+                  Last Name
+                </label>
                 <input
                   name="lastName"
                   type="text"
@@ -113,7 +135,9 @@ export default function SignUpPage() {
                 placeholder="Enter your email"
                 className="w-full border border-gray-400 p-3 rounded"
               />
-              {errors.email && <p className="text-red-500 text-sm">{errors.email[0]}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email[0]}</p>
+              )}
             </div>
 
             <div>
@@ -135,11 +159,15 @@ export default function SignUpPage() {
                   {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-500 text-sm">{errors.password[0]}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm">{errors.password[0]}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium mb-1">
+                Confirm Password
+              </label>
               <div className="relative">
                 <input
                   name="confirmPassword"
@@ -154,7 +182,11 @@ export default function SignUpPage() {
                   className="absolute right-3 top-3 text-gray-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <EyeOff size={25} /> : <Eye size={25} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={25} />
+                  ) : (
+                    <Eye size={25} />
+                  )}
                 </button>
               </div>
             </div>
@@ -166,7 +198,9 @@ export default function SignUpPage() {
                 required
                 className="w-5 h-5 appearance-none border-2 border-gray-400 rounded-full checked:bg-blue-600 checked:border-transparent transition duration-200"
               />
-              <label htmlFor="terms">I agree with the terms of use of HRIS</label>
+              <label htmlFor="terms">
+                I agree with the terms of use of HRIS
+              </label>
             </div>
 
             <button

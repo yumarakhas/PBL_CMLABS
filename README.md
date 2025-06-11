@@ -12,10 +12,10 @@
 HRIS adalah aplikasi berbasis web & mobile yang dirancang untuk membantu aktivitas dan tugas tim Human Resource (HR).  
 Fokus utama pengembangan mencakup:
 
-- 👤 Manajemen data karyawan  
+- 👤 Manajemen data karyawan
 - 📄 Pengelolaan surat menyurat
-- ⏰ Absensi kehadiran  
-- 🕒 Pengelolaan lembur  
+- ⏰ Absensi kehadiran
+- 🕒 Pengelolaan lembur
 - 💳 Langganan berbayar
 
 ---
@@ -34,30 +34,30 @@ Mengembangkan aplikasi berbasis website yang mampu mengelola:
 
 ## 🧰 Tech Stack
 
-| Layer         | Teknologi                       |
-|---------------|---------------------------------|
-| Frontend      | ⚛️ [Next.js](https://nextjs.org/)              |
-| Styling       | 🎨 [Tailwind CSS](https://tailwindcss.com/)     |
-| Backend       | 🔧 [Laravel](https://laravel.com/)              |
-| Database      | 🗄️ [PostgreSQL](https://www.postgresql.org/)     |
-| Payment       | 💸 [Xendit](https://www.xendit.co/id/)         |
+| Layer    | Teknologi                                    |
+| -------- | -------------------------------------------- |
+| Frontend | ⚛️ [Next.js](https://nextjs.org/)            |
+| Styling  | 🎨 [Tailwind CSS](https://tailwindcss.com/)  |
+| Backend  | 🔧 [Laravel](https://laravel.com/)           |
+| Database | 🗄️ [PostgreSQL](https://www.postgresql.org/) |
+| Payment  | 💸 [Xendit](https://www.xendit.co/id/)       |
 
 ---
 
 ## 🧑‍💻 Team 11 - Developer Squad
 
-| Nama                            | NIM           |
-|---------------------------------|---------------|
-| 👩‍💻 Shasia Sasa Salsabyla       | 2241720029    |
-| 👨‍💻 Sukma Bagus Wahasdwika      | 2241720223    |
-| 👩‍💻 Triyana Dewi Fatmawati      | 2241720206    |
-| 👨‍💻 Yuma Rakha Samodra Sikayo   | 2241720194    |
+| Nama                         | NIM        |
+| ---------------------------- | ---------- |
+| 👩‍💻 Shasia Sasa Salsabyla     | 2241720029 |
+| 👨‍💻 Sukma Bagus Wahasdwika    | 2241720223 |
+| 👩‍💻 Triyana Dewi Fatmawati    | 2241720206 |
+| 👨‍💻 Yuma Rakha Samodra Sikayo | 2241720194 |
 
 ---
 
 ## ☁️ Cloud Architecture
 
-![Cloud Architecture](Cloud-Architecture-HRIS.jpg)
+![Cloud Architecture](./.github/assets/Cloud-Architecture-HRIS.jpg)
 
 ---
 

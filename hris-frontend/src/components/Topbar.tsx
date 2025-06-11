@@ -17,28 +17,30 @@ export default function Topbar({ title }: { title: string }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [user, setUser] = useState<UserProfile>({});
 
-  const userName =
-    pathname.startsWith("/user") ? "User" :
-    pathname.startsWith("/admin") ? "Admin" :
-    "Guest";
+  const userName = pathname.startsWith("/user")
+    ? "User"
+    : pathname.startsWith("/admin")
+    ? "Admin"
+    : "Guest";
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/profile", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setUser(data))
-      .catch(() => setUser({}));
+    import("@/lib/api").then(({ default: api }) => {
+      api
+        .get("/profile", { withCredentials: true })
+        .then((res) => setUser(res.data))
+        .catch(() => setUser({}));
+    });
   }, []);
 
   const handleLogout = async () => {
-    await fetch("http://localhost:8000/api/logout", {
-      method: "POST",
-      credentials: "include"
-    });
+    const api = (await import("@/lib/api")).default;
+    await api.post("/logout", {}, { withCredentials: true });
     router.push("/signin");
   };
 
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const profileImageUrl = user.photo
-    ? `http://localhost:8000/storage/photos/${user.photo}`
+    ? `${apiBaseUrl.replace("/api", "")}/storage/photos/${user.photo}`
     : "/default-avatar.png"; // kamu bisa ganti default-avatar.png dengan yang kamu punya
 
   return (
@@ -64,7 +66,10 @@ export default function Topbar({ title }: { title: string }) {
         </div>
 
         {/* User Profile Dropdown */}
-        <div className="relative cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
+        <div
+          className="relative cursor-pointer"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+        >
           <div className="flex items-center gap-2">
             <img
               src={profileImageUrl}
@@ -76,10 +81,16 @@ export default function Topbar({ title }: { title: string }) {
 
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 bg-white text-black rounded shadow-md w-40 z-50">
-              <Link href="/admin/view-profile" className="block px-4 py-2 hover:bg-gray-100">
+              <Link
+                href="/admin/view-profile"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
                 View Profile
               </Link>
-              <Link href="/admin/edit-profile" className="block px-4 py-2 hover:bg-gray-100">
+              <Link
+                href="/admin/edit-profile"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
                 Edit Profile
               </Link>
               <button

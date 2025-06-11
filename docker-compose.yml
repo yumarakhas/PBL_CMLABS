@@ -1,0 +1,64 @@
+version: "4.0"
+
+services:
+  frontend:
+    build:
+      context: ./hris-frontend
+      dockerfile: Dockerfile
+    container_name: hris-frontend
+    ports:
+      - "3005:3000"
+    env_file:
+      - ./hris-frontend/.env
+    networks:
+      - hris_network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./hris-backend
+      dockerfile: Dockerfile
+    container_name: hris-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./hris-backend/.env
+    volumes:
+      - ./hris-backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hris_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/test"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: hris-database
+    restart: always
+    ports:
+      - "5434:5432"
+    env_file:
+      - ./.docker/database/.env.db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hris_network
+
+networks:
+  hris_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

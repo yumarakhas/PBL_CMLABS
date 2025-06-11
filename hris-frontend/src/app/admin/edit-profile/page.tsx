@@ -16,11 +16,9 @@ export default function EditProfile() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/profile", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    import("@/lib/api").then(({ default: api }) => {
+      api.get("/profile", { withCredentials: true }).then((res) => {
+        const data = res.data;
         setForm({
           first_name: data.first_name || "",
           last_name: data.last_name || "",
@@ -30,6 +28,7 @@ export default function EditProfile() {
         });
         setProfilePhoto(data.profile_photo);
       });
+    });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,35 +51,76 @@ export default function EditProfile() {
       formData.append("photo", photo);
     }
 
-    await fetch("http://localhost:8000/api/profile/update", {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    });
-
+    const api = (await import("@/lib/api")).default;
+    await api.post("/profile/update", formData, { withCredentials: true });
     router.push("/admin/view-profile");
   };
 
   return (
     <div className="max-w-md mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
-
       {profilePhoto && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={`http://localhost:8000/storage/photos/${profilePhoto}`}
+          src={`${(process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(
+            "/api",
+            ""
+          )}/storage/photos/${profilePhoto}`}
           alt="Profile"
+          width={96}
+          height={96}
           className="w-24 h-24 rounded-full object-cover mb-4 mx-auto"
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-        <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="First Name" className="w-full border p-2 rounded" />
-        <input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Last Name" className="w-full border p-2 rounded" />
-        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="w-full border p-2 rounded" />
-        <input name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Phone Number" className="w-full border p-2 rounded" />
-        <input name="password" value={form.password} onChange={handleChange} placeholder="New Password" type="password" className="w-full border p-2 rounded" />
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        encType="multipart/form-data"
+      >
+        <input
+          name="first_name"
+          value={form.first_name}
+          onChange={handleChange}
+          placeholder="First Name"
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="last_name"
+          value={form.last_name}
+          onChange={handleChange}
+          placeholder="Last Name"
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="Email"
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="phone_number"
+          value={form.phone_number}
+          onChange={handleChange}
+          placeholder="Phone Number"
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          placeholder="New Password"
+          type="password"
+          className="w-full border p-2 rounded"
+        />
         <input type="file" onChange={handleFileChange} className="w-full" />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Save
+        </button>
       </form>
     </div>
   );

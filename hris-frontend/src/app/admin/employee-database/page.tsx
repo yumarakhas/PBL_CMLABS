@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
-import { FileText, Eye } from "lucide-react";
 import { MdClose } from "react-icons/md";
 import {
   FiFilter,
@@ -11,7 +10,7 @@ import {
   FiEye,
   FiDownload,
 } from "react-icons/fi";
-import { FaPlus, FaUserCircle } from "react-icons/fa";
+import { FaPlus  } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { getEmployees, deleteEmployee } from "@/lib/services/employee";
 import * as XLSX from "xlsx";
@@ -32,7 +31,10 @@ type AvatarProps = {
 function EmployeeAvatar({ src, alt }: AvatarProps) {
   const [imgError, setImgError] = useState(false);
 
-  const baseUrl = "http://localhost:8000/storage/";
+  const baseUrl =
+    (process.env.NEXT_PUBLIC_API_BASE_URL
+      ? process.env.NEXT_PUBLIC_API_BASE_URL.replace("/api", "")
+      : "http://localhost:8000") + "/storage/";
 
   const fullSrc = src?.startsWith("http") ? src : `${baseUrl}${src}`;
 
@@ -270,7 +272,9 @@ export default function EmployeeDatabasetPage() {
       return null;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+      ? process.env.NEXT_PUBLIC_API_BASE_URL.replace("/api", "")
+      : "http://localhost:8000";
 
     const cleanPath = achievement.file_path.startsWith("/")
       ? achievement.file_path.slice(1)
@@ -320,19 +324,22 @@ export default function EmployeeDatabasetPage() {
             </div>
             <button
               onClick={() => setShowFilterModal(true)}
-              className="flex items-center gap-1 px-3 py-1 border rounded-md hover:bg-[#D9D9D9] text-sm">
+              className="flex items-center gap-1 px-3 py-1 border rounded-md hover:bg-[#D9D9D9] text-sm"
+            >
               <FiFilter /> Filter
             </button>
             <button
               onClick={handleExportToExcel}
-              className="flex items-center gap-1 px-3 py-1 border rounded-md hover:bg-[#D9D9D9] text-sm">
+              className="flex items-center gap-1 px-3 py-1 border rounded-md hover:bg-[#D9D9D9] text-sm"
+            >
               <FiDownload /> Export
             </button>
             <button
               className="flex items-center gap-1 px-3 py-1 bg-[#BA3C54] text-white rounded-md text-sm hover:opacity-80"
               onClick={() =>
                 router.push("/admin/employee-database/add-employee-database")
-              }>
+              }
+            >
               <FaPlus /> Add Data
             </button>
           </div>
@@ -402,12 +409,14 @@ export default function EmployeeDatabasetPage() {
                             `/admin/employee-database/edit-employee-database/${employee.id}`
                           )
                         }
-                        className="text-white bg-gray-600 px-2 py-2 rounded-md hover:opacity-70 text-xl">
+                        className="text-white bg-gray-600 px-2 py-2 rounded-md hover:opacity-70 text-xl"
+                      >
                         <FiEdit />
                       </button>
                       <button
                         onClick={() => handleDelete(employee.id)}
-                        className="text-white bg-red-700 px-2 py-2 rounded-md hover:opacity-70 text-xl">
+                        className="text-white bg-red-700 px-2 py-2 rounded-md hover:opacity-70 text-xl"
+                      >
                         <FiTrash2 />
                       </button>
                       <button
@@ -415,7 +424,8 @@ export default function EmployeeDatabasetPage() {
                         onClick={() => {
                           setSelectedEmployee(employee);
                           setShowModal(true);
-                        }}>
+                        }}
+                      >
                         <FiEye />
                       </button>
                     </div>
@@ -437,7 +447,8 @@ export default function EmployeeDatabasetPage() {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-md px-2 py-1">
+              className="border border-gray-300 rounded-md px-2 py-1"
+            >
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={30}>30</option>
@@ -454,7 +465,8 @@ export default function EmployeeDatabasetPage() {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50">
+              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
+            >
               ‹
             </button>
             {Array.from({ length: totalPages }, (_, i) => (
@@ -465,14 +477,16 @@ export default function EmployeeDatabasetPage() {
                   currentPage === i + 1
                     ? "bg-gray-300"
                     : "bg-white hover:bg-gray-100"
-                }`}>
+                }`}
+              >
                 {i + 1}
               </button>
             ))}
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50">
+              className="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
+            >
               ›
             </button>
           </div>
@@ -486,7 +500,8 @@ export default function EmployeeDatabasetPage() {
                 <h2 className="text-xl font-semibold">Filtering Data</h2>
                 <button
                   onClick={() => setShowFilterModal(false)}
-                  className="text-gray-500 hover:text-gray-700">
+                  className="text-gray-500 hover:text-gray-700"
+                >
                   <MdClose className="text-2xl" />
                 </button>
               </div>
@@ -597,7 +612,8 @@ export default function EmployeeDatabasetPage() {
                 <h2 className="text-xl font-semibold">Employee Details</h2>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="text-2xl">
+                  className="text-2xl"
+                >
                   <MdClose />
                 </button>
               </div>
@@ -740,7 +756,8 @@ export default function EmployeeDatabasetPage() {
                             }`}
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke="currentColor">
+                            stroke="currentColor"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -773,8 +790,9 @@ export default function EmployeeDatabasetPage() {
 
                       return (
                         <div
-                          key={achievement.id || `achievement-${index}`}
-                          className="flex items-center justify-between border rounded-md p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+                          key={`achievement-${index}`}
+                          className="flex items-center justify-between border rounded-md p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                        >
                           <div className="flex items-center space-x-3">
                             <div className="flex-shrink-0">
                               {getFileIcon(fileName)}
@@ -782,7 +800,8 @@ export default function EmployeeDatabasetPage() {
                             <div className="flex-1 min-w-0">
                               <p
                                 className="font-medium text-gray-900 truncate"
-                                title={fileName}>
+                                title={fileName}
+                              >
                                 {fileName}
                               </p>
                               <span className="text-green-600 text-sm font-medium bg-green-100 px-2 py-0.5 rounded">
@@ -795,13 +814,15 @@ export default function EmployeeDatabasetPage() {
                             type="button"
                             onClick={openFile}
                             className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                            title="View file">
+                            title="View file"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="w-4 h-4 mr-1"
                               fill="none"
                               viewBox="0 0 24 24"
-                              stroke="currentColor">
+                              stroke="currentColor"
+                            >
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -828,7 +849,8 @@ export default function EmployeeDatabasetPage() {
                       className="h-12 w-12 text-gray-400 mx-auto mb-2"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor">
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"

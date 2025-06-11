@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
 import EmployeeForm from "@/components/EmployeeForm";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { getEmployeeById, updateEmployee } from "@/lib/services/employee";

@@ -115,20 +115,10 @@ export default function CompanyDetailPage() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch("/api/company-details", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ branches, divisions, positions }),
-      });
-
-      if (response.ok) {
-        alert("Company details saved successfully!");
-        router.push("/admin/dashboard");
-      } else {
-        alert("Error saving company details");
-      }
+      const api = (await import("@/lib/api")).default;
+      await api.post("/company-details", { branches, divisions, positions });
+      alert("Company details saved successfully!");
+      router.push("/admin/dashboard");
     } catch (error) {
       console.error("Error:", error);
       alert("Error saving company details");
@@ -156,7 +146,8 @@ export default function CompanyDetailPage() {
                       index === 3
                         ? "bg-blue-600 text-white border-blue-600"
                         : "bg-white text-gray-400 border-gray-300"
-                    }`}>
+                    }`}
+                  >
                     {index + 1}
                   </div>
                   <span className="text-sm mt-2 text-gray-600 w-24 text-center font-medium">
@@ -270,7 +261,8 @@ export default function CompanyDetailPage() {
                       <td className="px-4 py-2 text-center">
                         <button
                           onClick={() => handleRemove("branch", i)}
-                          className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm">
+                          className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm"
+                        >
                           <FaTrash size={14} />
                         </button>
                       </td>
@@ -283,7 +275,8 @@ export default function CompanyDetailPage() {
               <div className="px-4 py-4">
                 <button
                   onClick={() => handleAdd("branch")}
-                  className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
                   <FaPlus size={14} className="mr-1" /> Add New Branch
                 </button>
               </div>
@@ -346,7 +339,8 @@ export default function CompanyDetailPage() {
                         <td className="px-4 py-2 text-center">
                           <button
                             onClick={() => handleRemove("position", i)}
-                            className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm">
+                            className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm"
+                          >
                             <FaTrash size={14} />
                           </button>
                         </td>
@@ -358,7 +352,8 @@ export default function CompanyDetailPage() {
                 <div className="px-4 py-4">
                   <button
                     onClick={() => handleAdd("position")}
-                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
                     <FaPlus size={14} className="mr-1" /> Add New Position
                   </button>
                 </div>
@@ -420,7 +415,8 @@ export default function CompanyDetailPage() {
                         <td className="px-4 py-2 text-center">
                           <button
                             onClick={() => handleRemove("division", i)}
-                            className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm">
+                            className="text-white bg-red-600 px-2 py-2 rounded-md hover:opacity-70 text-sm"
+                          >
                             <FaTrash size={14} />
                           </button>
                         </td>
@@ -432,7 +428,8 @@ export default function CompanyDetailPage() {
                 <div className="px-4 py-4">
                   <button
                     onClick={() => handleAdd("division")}
-                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
                     <FaPlus size={14} className="mr-1" /> Add New Division
                   </button>
                 </div>
@@ -448,7 +445,8 @@ export default function CompanyDetailPage() {
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-medium">
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-medium"
+          >
             Save
           </button>
         </div>
