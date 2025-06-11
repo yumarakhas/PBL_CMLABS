@@ -1,30 +1,55 @@
-// signin->page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { loginAdmin } from "@/lib/api";
-import { Eye, EyeOff } from "lucide-react"; // Import Eye and EyeOff icons
+import { Eye, EyeOff } from "lucide-react";
+import Cookies from "js-cookie";
 
 export default function SignInPage() {
   const router = useRouter();
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Auto-redirect jika sudah login
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (token && token !== "undefined") {
+      router.replace("/admin/dashboard");
+    }
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setError("");
 
     try {
-      const res = await loginAdmin(identifier, password);
-      localStorage.setItem("admin_auth_token", res.token);
-      router.push("/admin/dashboard");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      const res = await fetch("http://localhost:8000/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        // Simpan token ke cookies (valid selama 1 hari)
+        Cookies.set("token", data.token, { expires: 1 });
+
+        // Redirect ke dashboard
+        router.push("/admin/dashboard");
+      } else {
+        setError(data.message || "Login gagal, periksa email/password Anda.");
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan koneksi ke server.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,9 +65,8 @@ export default function SignInPage() {
           className="object-contain max-w-full h-auto"
         />
       </div>
-
-      {/* Kanan - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-[#ffffff] px-6 sm:px-12 md:px-16 lg:px-20 py-10">
+      {/* Kanan - Form Login */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 sm:px-12 md:px-16 lg:px-20 py-10">
         <div>
           <div className="flex justify-between items-center mb-8">
             <Image
@@ -59,12 +83,12 @@ export default function SignInPage() {
             </Link>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3">Sign in</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">Sign in</h1>
           <p className="text-gray-600 mb-6">
             Welcome back to HRIS cmlabs! Manage everything with ease.
           </p>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleLogin}>
             {error && <p className="text-red-500">{error}</p>}
 
             <div>
@@ -73,8 +97,8 @@ export default function SignInPage() {
               </label>
               <input
                 type="text"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email or phone number"
                 className="w-full border border-gray-400 p-3 rounded"
                 required
@@ -84,20 +108,18 @@ export default function SignInPage() {
             <div>
               <label className="block text-sm font-medium mb-1">Password</label>
               <div className="relative">
-                {" "}
-                {/* Added relative positioning */}
                 <input
-                  type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full border border-gray-400 p-3 rounded pr-10" // Add padding-right for the icon
+                  className="w-full border border-gray-400 p-3 rounded pr-10"
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-3 text-gray-600" // Position the icon
-                  onClick={() => setShowPassword(!showPassword)} // Toggle showPassword state
+                  className="absolute right-3 top-3 text-gray-600"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
                 </button>
@@ -134,21 +156,22 @@ export default function SignInPage() {
 
             <button
               type="submit"
-              className="w-full bg-gray-800 text-white py-4 rounded font-semibold hover:bg-gray-900 transition"
+              className="w-full bg-gray-800 text-white py-4 rounded font-semibold hover:bg-gray-900 transition disabled:opacity-50"
+              disabled={loading}
             >
-              SIGN IN
+              {loading ? "Signing in..." : "SIGN IN"}
             </button>
 
             <button
               type="button"
-              className="w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Sign in with Google
             </button>
 
             <Link
               href="/signin/idemployee"
-              className="block text-center w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="block text-center w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Sign in with ID Employee
             </Link>

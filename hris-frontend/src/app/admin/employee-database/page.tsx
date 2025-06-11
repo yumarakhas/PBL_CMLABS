@@ -10,7 +10,7 @@ import {
   FiEye,
   FiDownload,
 } from "react-icons/fi";
-import { FaPlus  } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { getEmployees, deleteEmployee } from "@/lib/services/employee";
 import * as XLSX from "xlsx";
@@ -137,8 +137,32 @@ export default function EmployeeDatabasetPage() {
   const fetchEmployees = async () => {
     try {
       const res = await getEmployees();
-      const employees = res.data.map((emp: any) => {
-        let achievements: AchievementData[] = [];
+      console.log("Raw API response:", res); // Debug: lihat struktur response
+
+      // Cek berbagai kemungkinan struktur response
+      let employeesData = [];
+
+      if (Array.isArray(res)) {
+        // Jika response langsung berupa array
+        employeesData = res;
+      } else if (res.data && Array.isArray(res.data)) {
+        // Jika data ada di res.data
+        employeesData = res.data;
+      } else if (
+        res.data &&
+        res.data.employees &&
+        Array.isArray(res.data.employees)
+      ) {
+        // Jika data ada di res.data.employees
+        employeesData = res.data.employees;
+      } else {
+        console.error("Unexpected response structure:", res);
+        // Set employeesData sebagai array kosong jika struktur tidak dikenali
+        employeesData = [];
+      }
+
+      const employees = employeesData.map((emp: any) => {
+        let achievements = [];
 
         // Handle berbagai format achievements dari backend
         if (emp.achievements) {
@@ -161,7 +185,7 @@ export default function EmployeeDatabasetPage() {
         }
 
         const validAchievements = achievements.filter(
-          (achievement: AchievementData) =>
+          (achievement: any) =>
             achievement &&
             (achievement.file_path || achievement.original_filename)
         );
@@ -200,7 +224,7 @@ export default function EmployeeDatabasetPage() {
         Division: divisionCount,
       }));
 
-      console.log("Fetched employees with achievements:", employees);
+      console.log("Processed employees:", employees);
       employees.forEach((emp: any) => {
         if (emp.Achievements && emp.Achievements.length > 0) {
           console.log(
@@ -211,6 +235,19 @@ export default function EmployeeDatabasetPage() {
       });
     } catch (error) {
       console.error("Error fetching employees:", error);
+      // Set state dengan data kosong jika terjadi error
+      setEmployees([]);
+      setSummary((prev) => ({
+        ...prev,
+        period: new Date().toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        }),
+        totalEmployees: 0,
+        activeEmployees: 0,
+        Branch: 0,
+        Division: 0,
+      }));
     }
   };
 

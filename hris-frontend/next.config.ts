@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-   experimental: {
+  experimental: {
     serverActions: {
-      bodySizeLimit: '5mb', 
+      bodySizeLimit: "5mb",
     },
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 

@@ -73,7 +73,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 py-10">
+      <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 sm:px-12 md:px-16 lg:px-20 py-10">
         <div>
           <div className="flex justify-between items-center mb-8">
             <Image
@@ -107,7 +107,7 @@ export default function SignUpPage() {
                   value={form.firstName}
                   onChange={handleChange}
                   placeholder="Enter your first name"
-                  className="w-full border border-gray-400 p-3 rounded"
+                  className="w-full border border-gray-400 p-2 rounded"
                 />
               </div>
               <div className="w-full">
@@ -120,7 +120,7 @@ export default function SignUpPage() {
                   value={form.lastName}
                   onChange={handleChange}
                   placeholder="Enter your last name"
-                  className="w-full border border-gray-400 p-3 rounded"
+                  className="w-full border border-gray-400 p-2 rounded"
                 />
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function SignUpPage() {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
-                className="w-full border border-gray-400 p-3 rounded"
+                className="w-full border border-gray-400 p-2 rounded"
               />
               {errors.email && (
                 <p className="text-red-500 text-sm">{errors.email[0]}</p>
@@ -149,7 +149,7 @@ export default function SignUpPage() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className="w-full border border-gray-400 p-3 rounded pr-10"
+                  className="w-full border border-gray-400 p-2 rounded pr-10"
                 />
                 <button
                   type="button"
@@ -175,7 +175,7 @@ export default function SignUpPage() {
                   value={form.confirmPassword}
                   onChange={handleChange}
                   placeholder="Enter your confirm password"
-                  className="w-full border border-gray-400 p-3 rounded pr-10"
+                  className="w-full border border-gray-400 p-2 rounded pr-10"
                 />
                 <button
                   type="button"
@@ -205,7 +205,7 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              className="w-full bg-gray-800 text-white py-4 rounded font-semibold hover:bg-gray-900 transition"
+              className="w-full bg-blue-500 text-white py-3 rounded font-semibold hover:bg-blue-700 transition"
             >
               SIGN UP
             </button>
@@ -213,7 +213,7 @@ export default function SignUpPage() {
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Sign up with Google
             </button>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 type Company = {
   name: string;
@@ -13,9 +13,9 @@ type Company = {
 };
 
 export default function AdminProfile() {
-  const [company, setCompany] = useState<Company | null>(null);
+  const [company, setCompany] = useState<Company | null>(null)
+  const router = useRouter()
 
-  // Dummy payment data
   const payments = [
     {
       id: 1,
@@ -27,15 +27,21 @@ export default function AdminProfile() {
     },
     {
       id: 2,
-      orderDate: "2025-03-31",
-      package: "Starter",
-      period: "1 month",
-      total: "Rp 500.000",
-      status: "Paid",
+      orderDate: '2025-04-05',
+      package: 'Starter',
+      period: '1 month',
+      total: 'Rp 500.000',
+      status: 'Paid',
+    },
+    {
+      id: 3,
+      orderDate: '2025-02-01',
+      package: 'Free Trial',
+      period: '1 month',
+      total: 'Rp 0',
+      status: 'Paid',
     },
   ];
-
-  const router = useRouter();
 
   useEffect(() => {
     import("@/lib/api").then(({ default: api }) => {
@@ -49,106 +55,88 @@ export default function AdminProfile() {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
+    <div className="max-w-5xl mx-auto p-8 space-y-10 text-neutral-700 font-sans">
       {/* Admin Section */}
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold">Admin Profile</h1>
-        <p className="text-gray-600">
-          Details about your subscription and company
-        </p>
+      <div>
+        <h1 className="text-4xl font-bold mb-1">Admin Profile</h1>
+        <p className="text-base text-neutral-500">Details about your subscription and company</p>
       </div>
 
       {/* Subscription Info */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Subscription Details</h2>
-        <p className="text-sm text-gray-600 mb-1">Current Package:</p>
-        <p className="font-bold text-blue-600">Free Trial</p>
-        <p className="text-sm mb-4">
-          Complete HR management with document system
+      <div className="bg-white rounded-2xl shadow p-6">
+        <h2 className="text-2xl font-semibold mb-3">Subscription Details</h2>
+        <p className="text-sm text-neutral-500 mb-1">Current Package:</p>
+        <p className="font-semibold text-blue-600 text-lg mb-2">Starter</p>
+        <p className="text-sm text-neutral-600 mb-4">
+          Make the most out of your HRIS experience — choose a package that gives your company room to grow.
         </p>
         <button
-          onClick={() => router.push("/package-plans")}
-          className="px-2 py-1 bg-blue-500 text-white rounded-md cursor-pointer hover:bg-blue-600 transition"
+          onClick={() => router.push('/package-plans')}
+          className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Change Package
         </button>
       </div>
 
       {/* Payment History */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Payment History</h2>
-        <table className="w-full text-sm rounded-lg overflow-hidden">
-          <thead>
-            <tr className="bg-gray-200 text-left">
-              <th className="p-2">No.</th>
-              <th className="p-2">Date</th>
-              <th className="p-2">Package</th>
-              <th className="p-2">Period</th>
-              <th className="p-2">Total</th>
-              <th className="p-2">Status</th>
-              <th className="p-2">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments.map((item) => (
-              <tr key={item.id} className="even:bg-gray-100">
-                <td className="p-2">{item.id}</td>
-                <td className="p-2">{item.orderDate}</td>
-                <td className="p-2">{item.package}</td>
-                <td className="p-2">{item.period}</td>
-                <td className="p-2">{item.total}</td>
-                <td className="p-2 text-sm">
-                  <span
-                    className={
-                      item.status === "Paid" ? "text-green-600" : "text-red-600"
-                    }
-                  >
-                    {item.status}
-                  </span>
-                </td>
-                <td className="p-2">
-                  {item.status === "Unpaid" && (
-                    <button className="px-2 py-1 bg-red-500 text-white rounded cursor-pointer hover:bg-red-600 transition">
-                      Bayar
-                    </button>
-                  )}
-                </td>
+      <div className="bg-white rounded-2xl shadow p-6">
+        <h2 className="text-2xl font-semibold mb-4">Payment History</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-neutral-100 text-left">
+                <th className="p-3 font-medium">No.</th>
+                <th className="p-3 font-medium">Date</th>
+                <th className="p-3 font-medium">Package</th>
+                <th className="p-3 font-medium">Period</th>
+                <th className="p-3 font-medium">Total</th>
+                <th className="p-3 font-medium">Status</th>
+                <th className="p-3 font-medium">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {payments.map((item) => (
+                <tr key={item.id} className="even:bg-neutral-50">
+                  <td className="p-3">{item.id}</td>
+                  <td className="p-3">{item.orderDate}</td>
+                  <td className="p-3">{item.package}</td>
+                  <td className="p-3">{item.period}</td>
+                  <td className="p-3">{item.total}</td>
+                  <td className="p-3">
+                    <span className={item.status === 'Paid' ? 'text-green-600 font-semibold' : 'text-red-500 font-semibold'}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    {item.status === 'Unpaid' && (
+                      <button className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm font-medium">
+                        Pay
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Company Info */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Company Information</h2>
-        </div>
+      <div className="bg-white rounded-2xl shadow p-6">
+        <h2 className="text-2xl font-semibold mb-4">Company Information</h2>
         {company ? (
-          <div className="space-y-1 text-sm">
-            <p>
-              <strong>Name:</strong> {company.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {company.email}
-            </p>
-            <p>
-              <strong>Phone:</strong> {company.head_office_phone}
-            </p>
-            <p>
-              <strong>Backup Phone:</strong> {company.head_office_phone_backup}
-            </p>
-            <p>
-              <strong>Address:</strong> {company.head_office_address}
-            </p>
-            <p>
-              <strong>Description:</strong> {company.description}
-            </p>
+          <div className="text-sm space-y-1">
+            <p><span className="font-medium">Name:</span> {company.name}</p>
+            <p><span className="font-medium">Email:</span> {company.email}</p>
+            <p><span className="font-medium">Phone:</span> {company.head_office_phone}</p>
+            <p><span className="font-medium">Backup Phone:</span> {company.head_office_phone_backup}</p>
+            <p><span className="font-medium">Address:</span> {company.head_office_address}</p>
+            <p><span className="font-medium">Description:</span> {company.description}</p>
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">Company data not loaded yet.</p>
+          <p className="text-neutral-400 text-sm">Company data not loaded yet.</p>
         )}
       </div>
     </div>
-  );
+  )
 }

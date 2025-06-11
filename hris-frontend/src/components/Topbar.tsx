@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import Link from "next/link";
+import Cookies from 'js-cookie';
 
 interface UserProfile {
   first_name?: string;
@@ -18,28 +19,65 @@ export default function Topbar({ title }: { title: string }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [user, setUser] = useState<UserProfile>({});
 
-  const userName = pathname.startsWith("/user")
-    ? "User"
-    : pathname.startsWith("/admin")
-    ? "Admin"
-    : "Guest";
+  const handleLogout = async () => {
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        window.location.href = '/signin';
+        return;
+      }
+
+      const res = await fetch('http://localhost:8000/api/admin/logout', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) {
+        console.error('Gagal logout:', await res.json());
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      Cookies.remove('token');
+      window.location.href = '/signin';
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    const token = Cookies.get('token');
+    if (!token) return;
+
+    try {
+      const res = await fetch("http://localhost:8000/api/admin/profile", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data); // asumsi respons langsung objek user
+      } else {
+        console.error("Gagal mengambil data profil:", await res.json());
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
 
   useEffect(() => {
-    api
-      .get<UserProfile>("/profile", { withCredentials: true })
-      .then((res: { data: UserProfile }) => setUser(res.data))
-      .catch(() => setUser({}));
+    fetchUserProfile();
   }, []);
-
-  const handleLogout = async () => {
-    await api.post("/logout", {}, { withCredentials: true });
-    router.push("/signin");
-  };
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const profileImageUrl = user.photo
-    ? `${apiBaseUrl.replace("/api", "")}/storage/photos/${user.photo}`
-    : "/default-avatar.png"; // kamu bisa ganti default-avatar.png dengan yang kamu punya
+    ? `http://localhost:8000/storage/photos/${user.photo}`
+    : "/default-avatar.png";
 
   return (
     <div className="flex items-center justify-between px-6 py-3 bg-[#1C3D5A] text-white w-full shadow-md relative">
@@ -58,7 +96,6 @@ export default function Topbar({ title }: { title: string }) {
 
       {/* Icons & User Menu */}
       <div className="flex items-center gap-4 relative">
-        {/* Notification */}
         <div className="p-2 rounded-full hover:bg-white hover:text-[#1C3D5A] transition">
           <FiBell className="text-lg" />
         </div>
@@ -74,7 +111,7 @@ export default function Topbar({ title }: { title: string }) {
               alt="User"
               className="w-8 h-8 rounded-full object-cover border"
             />
-            <span className="text-sm">{user.first_name || userName} ⏷</span>
+            <span className="text-sm">{user.first_name || "Admin"} ⏷</span>
           </div>
 
           {dropdownOpen && (

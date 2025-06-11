@@ -76,28 +76,6 @@ export default function Sidebar() {
     await api.post("/logout", {}, { withCredentials: true });
     router.push("/signin");
   };
-  // const handleLogout = async () => {
-  //   const token = getCookie('token');
-
-  //   try {
-  //     await axios.post(
-  //       `${process.env.NEXT_PUBLIC_API_BASE_URL}/logout`,
-  //       {},
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         withCredentials: true,
-  //       }
-  //     );
-
-  //     deleteCookie('token');
-  //     router.push('/signin');
-  //   } catch (error) {
-  //     console.error('Logout failed:', error);
-  //   }
-  // };
-
   return (
     <aside className="group/sidebar relative h-screen sticky top-0 transition-all duration-300 bg-white shadow-md hover:w-48 w-16">
       <div className="flex items-center gap-2 px-3 py-4 pl-5">
