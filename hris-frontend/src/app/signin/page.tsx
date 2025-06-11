@@ -65,7 +65,6 @@ export default function SignInPage() {
           className="object-contain max-w-full h-auto"
         />
       </div>
-
       {/* Kanan - Form Login */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between bg-white px-6 sm:px-12 md:px-16 lg:px-20 py-10">
         <div>
@@ -76,7 +75,7 @@ export default function SignInPage() {
             </Link>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3">Sign in</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">Sign in</h1>
           <p className="text-gray-600 mb-6">
             Welcome back to HRIS cmlabs! Manage everything with ease.
           </p>
@@ -148,14 +147,14 @@ export default function SignInPage() {
 
             <button
               type="button"
-              className="w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Sign in with Google
             </button>
 
             <Link
               href="/signin/idemployee"
-              className="block text-center w-full border border-black py-4 rounded font-semibold hover:bg-gray-100 transition"
+              className="block text-center w-full border border-black py-3 rounded font-semibold hover:bg-blue-100 transition"
             >
               Sign in with ID Employee
             </Link>

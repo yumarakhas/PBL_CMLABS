@@ -12,6 +12,23 @@ import 'aos/dist/aos.css';
 export default function Home() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState('home');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Handle client-side rendering to prevent hydration errors
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  const navItems = [
+    { id: "home", label: "Home" },
+    { id: "features", label: "Packages" },
+    { id: "why-choose", label: "Why Choose Us" },
+    { id: "partners", label: "Our Partners" },
+    { id: "contact", label: "Contact" },
+  ];
 
   // Handle smooth scrolling and active section
   const scrollToSection = (sectionId: string) => {
@@ -24,6 +41,8 @@ export default function Home() {
 
   // Update active section on scroll
   useEffect(() => {
+    if (!isClient) return;
+
     AOS.init({
       duration: 1000,
       once: false,
@@ -42,33 +61,20 @@ export default function Home() {
       if (currentSection) setActiveSection(currentSection);
     };
 
-    // Jalankan saat mount: jika bukan di paling atas, scroll ke home
-    if (typeof window !== 'undefined') {
-      if (window.scrollY > 100) {
-        const home = document.getElementById('home');
-        if (home) {
-          home.scrollIntoView({ behavior: 'auto' });
-          setActiveSection('home');
-        }
-      } else {
-        handleScroll(); // posisi scroll atas, tetap jalankan deteksi aktif
+    // Initialize scroll position
+    if (window.scrollY > 100) {
+      const home = document.getElementById('home');
+      if (home) {
+        home.scrollIntoView({ behavior: 'auto' });
+        setActiveSection('home');
       }
+    } else {
+      handleScroll();
     }
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-  
-  const [menuOpen, setMenuOpen] = useState(false);
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-
-  const navItems = [
-    { id: "home", label: "Home" },
-    { id: "features", label: "Packages" },
-    { id: "why-choose", label: "Why Choose Us" },
-    { id: "partners", label: "Our Partners" },
-    { id: "contact", label: "Contact" },
-  ];
+  }, [isClient]);
 
   const ContactForm: React.FC = () => {
     const form = useRef<HTMLFormElement>(null);
@@ -139,6 +145,15 @@ export default function Home() {
       </form>
     );
   };
+
+  // Show loading state during hydration
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans">
@@ -186,7 +201,7 @@ export default function Home() {
         {menuOpen && (
           <div className="md:hidden bg-white border-t border-gray-200 px-4 py-4">
             <nav className="flex flex-col space-y-4 text-gray-700">
-              {['home', 'features', 'why-choose', 'partners', 'contact'].map((id) => (
+              {navItems.map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => {
@@ -195,7 +210,7 @@ export default function Home() {
                   }}
                   className="text-left w-full hover:text-blue-600"
                 >
-                  {id.charAt(0).toUpperCase() + id.slice(1).replace('-', ' ')}
+                  {label}
                 </button>
               ))}
 
@@ -548,7 +563,7 @@ export default function Home() {
                   className="object-contain"
                 />
               </div>
-              <p className="text-gray-600 mt-4 font-medium text-center">PT cmlabs Indonesia Digital</p>
+              <p className="text-gray-600 mt-4 font-medium text-center">PT CM Labs Indonesia Digital</p>
             </div>
           </div>        
         </div>
@@ -558,7 +573,7 @@ export default function Home() {
       <section id="contact" className="py-24 px-4 bg-gray-50" data-aos="fade-in">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-4">Get in Touch</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto text-center mb-16">Questions? Feedback? We’re here to listen.</p>
+          <p className="text-gray-600 max-w-2xl mx-auto text-center mb-16">Questions? Feedback? We're here to listen.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <h3 className="text-2xl font-semibold mb-4">Contact Information</h3>
@@ -582,7 +597,6 @@ export default function Home() {
         </div>
       </section>
       
-
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 text-center py-8 text-gray-500 text-sm">
         © {new Date().getFullYear()} HRIS. All rights reserved.
