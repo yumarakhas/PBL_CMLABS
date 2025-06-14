@@ -68,6 +68,8 @@ Route::prefix('checkclocks')->group(function () {
     Route::put('/{id}/approve', [CheckClocksController::class, 'approve']);
     Route::put('/{id}/reject', [CheckClocksController::class, 'reject']);
 
+});
+
 // Rute publik lainnya
 Route::get('/package-plans', [PackagePlanController::class, 'index']);
 Route::get('/companies', [CompanyController::class, 'index']); // Mengambil daftar perusahaan
@@ -171,19 +173,19 @@ Route::prefix('user')->group(function () {
 
         // Karyawan: Clock setting
         Route::prefix('check-clock-settings')->group(function () {
-            Route::get('/', [CheckClockSettingController::class, 'index']);
-            Route::post('/', [CheckClockSettingController::class, 'store']);
-            Route::put('/{id}', [CheckClockSettingController::class, 'update']);
-            Route::delete('/{id}', [CheckClockSettingController::class, 'destroy']);
+            Route::get('/', [CheckClockSettingsController::class, 'index']);
+            Route::post('/', [CheckClockSettingsController::class, 'store']);
+            Route::put('/{id}', [CheckClockSettingsController::class, 'update']);
+            Route::delete('/{id}', [CheckClockSettingsController::class, 'destroy']);
         });
 
         // Karyawan: Clock in/out
         Route::prefix('check-clocks')->group(function () {
-            Route::get('/', [CheckClockController::class, 'index']);
-            Route::post('/', [CheckClockController::class, 'store']);
-            Route::put('/{id}', [CheckClockController::class, 'update']);
-            Route::delete('/{id}', [CheckClockController::class, 'destroy']);
-            Route::get('/report', [CheckClockController::class, 'report']);
+            Route::get('/', [CheckClocksController::class, 'index']);
+            Route::post('/', [CheckClocksController::class, 'store']);
+            Route::put('/{id}', [CheckClocksController::class, 'update']);
+            Route::delete('/{id}', [CheckClocksController::class, 'destroy']);
+            Route::get('/report', [CheckClocksController::class, 'report']);
         });
 
         // Karyawan: Employee data
