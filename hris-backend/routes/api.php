@@ -41,6 +41,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/profile', [AdminController::class, 'profile']);
         Route::put('/profile/update', [AdminController::class, 'update']);
         Route::post('/logout', [AuthController::class, 'logout']); 
+        Route::post('/store', [EmployeeController::class, 'store']);
     });
 });
 // API Check Clock
@@ -214,3 +215,8 @@ Route::prefix('user')->group(function () {
         });
     }); // Akhir dari middleware auth:sanctum untuk user
 }); // Akhir dari prefix user
+
+Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
+        // Tambahkan ini untuk create employee
+        Route::post('/', [EmployeeController::class, 'store']);
+    });

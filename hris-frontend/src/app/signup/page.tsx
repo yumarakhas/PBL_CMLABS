@@ -72,7 +72,7 @@ export default function SignUpPage() {
             </Link>
           </div>
 
-          <h1 className="text-3xl font-bold mb-3">Sign Up</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">Sign Up</h1>
           <p className="text-gray-600 mb-6">Create your account as admin.</p>
 
           {message && <p className="text-green-600 mb-4">{message}</p>}
@@ -132,7 +132,7 @@ export default function SignUpPage() {
                   className="absolute right-3 top-3 text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
+                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
               {errors.password && <p className="text-red-500 text-sm">{errors.password[0]}</p>}
@@ -154,7 +154,7 @@ export default function SignUpPage() {
                   className="absolute right-3 top-3 text-gray-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <EyeOff size={25} /> : <Eye size={25} />}
+                  {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-3 rounded font-semibold hover:bg-blue-700 transition"
+              className="w-full bg-gray-800 text-white py-4 rounded font-semibold hover:bg-gray-900 transition disabled:opacity-50"
             >
               SIGN UP
             </button>

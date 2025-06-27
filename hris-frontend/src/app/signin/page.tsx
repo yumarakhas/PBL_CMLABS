@@ -90,7 +90,7 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email or phone number"
-                className="w-full border border-gray-400 p-3 rounded"
+                className="w-full border border-gray-400 p-2 rounded"
                 required
               />
             </div>
@@ -103,7 +103,7 @@ export default function SignInPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full border border-gray-400 p-3 rounded pr-10"
+                  className="w-full border border-gray-400 p-2 rounded pr-10"
                   required
                 />
                 <button
@@ -111,7 +111,7 @@ export default function SignInPage() {
                   className="absolute right-3 top-3 text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
+                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
             </div>

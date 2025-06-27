@@ -1,92 +1,95 @@
-// lib/services/employee.ts
+// src/lib/services/employee.ts
 import api from '../api';
+import Cookies from 'js-cookie';
 
-// Mendapatkan daftar semua karyawan
-// Catatan: Ini mungkin hanya boleh diakses oleh admin atau role tertentu
+/** Get token from cookies and ensure it exists */
+const getAuthToken = () => {
+  const token = Cookies.get('token');
+  if (!token) {
+    throw new Error('Authentication token not found. Please login.');
+  }
+  return token;
+};
+
+/** Fetch all employees (for admin/user view) */
 export const getEmployees = () => {
-  // Disarankan menambahkan token admin/user dan otorisasi di backend
-  const token = localStorage.getItem('admin_auth_token') || localStorage.getItem('employee_auth_token'); // Ambil token yang relevan
-  return api.get('/user/employees', { // Sesuaikan endpoint sesuai routes/api.php
+  const token = getAuthToken();
+  return api.get('/user/employees', {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
-// Mendapatkan detail satu karyawan berdasarkan ID
-// Catatan: Karyawan mungkin hanya bisa melihat profilnya sendiri, admin bisa melihat semua
+/** Fetch single employee by ID */
 export const getEmployee = (id: number) => {
-  const token = localStorage.getItem('admin_auth_token') || localStorage.getItem('employee_auth_token');
-  return api.get(`/user/employees/${id}`, { // Sesuaikan endpoint sesuai routes/api.php
+  const token = getAuthToken();
+  return api.get(`/user/employees/${id}`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
-// Alias untuk getEmployee, mempertahankan kompatibilitas jika ada yang memanggilnya dengan nama ini
 export const getEmployeeById = (id: string | number) => {
-  return getEmployee(Number(id)); // Memastikan ID adalah number
+  return getEmployee(Number(id));
 };
 
-// Membuat karyawan baru (HANYA UNTUK ADMIN)
-// Mengirim data ke endpoint '/admin/employees'
-export const createEmployee = (data: any) => { // Ubah type data jika Anda mengirim JSON
-  const adminToken = localStorage.getItem('admin_auth_token');
-  if (!adminToken) {
-    throw new Error('Admin token tidak ditemukan. Mohon login sebagai admin.');
+/** ✅ CREATE: Add new employee into database (admin scope) */
+export const createEmployee = (data: FormData | object) => {
+  const token = getAuthToken();
+
+  // Determine content type: FormData or JSON
+  const isFormData = data instanceof FormData;
+  const headers: any = {
+    Authorization: `Bearer ${token}`,
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+  };
+
+  return api.post("/admin/store", data, {
+    headers,
+  });
+};
+
+/** ✅ UPDATE: Update employee info (supports FormData) */
+export const updateEmployee = (id: string | number, data: FormData | object) => {
+  const token = getAuthToken();
+
+  const formData = data instanceof FormData ? data : new FormData();
+  if (!(data instanceof FormData)) {
+    // Convert object to FormData
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value as string);
+      }
+    });
   }
 
-  // Jika Anda mengirim FormData (misalnya untuk upload file foto), biarkan Content-Type diatur otomatis oleh browser
-  // Jika Anda mengirim objek JSON biasa, pastikan headers diatur ke 'application/json'
-  return api.post("/admin/employees", data, { // Endpoint yang benar untuk admin membuat karyawan
+  formData.append('_method', 'PUT'); // Laravel-style method spoofing
+
+  return api.post(`/user/employees/${id}`, formData, {
     headers: {
-      'Authorization': `Bearer ${adminToken}`,
-      // 'Content-Type': 'application/json', // Hanya jika 'data' adalah objek JSON biasa
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
-// Memperbarui data karyawan
-// Catatan: Ini bisa diakses oleh karyawan untuk profilnya sendiri atau admin untuk karyawan lain
-export const updateEmployee = (id: string | number, data: FormData) => {
-  const token = localStorage.getItem('admin_auth_token') || localStorage.getItem('employee_auth_token');
-  if (!token) {
-    throw new Error('Token otentikasi tidak ditemukan.');
-  }
-
-  // Laravel menggunakan POST untuk PUT/PATCH dengan _method field saat menggunakan FormData
-  data.append("_method", "PUT");
-  return api.post(`/user/employees/${id}`, data, { // Sesuaikan endpoint sesuai routes/api.php
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-};
-
-// Menghapus karyawan (HANYA UNTUK ADMIN)
+/** ✅ DELETE: Remove employee from database */
 export const deleteEmployee = async (id: number) => {
-  const adminToken = localStorage.getItem('admin_auth_token');
-  if (!adminToken) {
-    throw new Error('Admin token tidak ditemukan. Mohon login sebagai admin.');
-  }
-  return await api.delete(`/user/employees/${id}`, { // Sesuaikan endpoint sesuai routes/api.php
+  const token = getAuthToken();
+  return await api.delete(`/user/employees/${id}`, {
     headers: {
-      'Authorization': `Bearer ${adminToken}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
-// Menghapus achievement karyawan
+/** ✅ DELETE: Remove specific achievement of an employee */
 export const removeAchievement = async (id: number) => {
-  const token = localStorage.getItem('admin_auth_token') || localStorage.getItem('employee_auth_token'); // Asumsi bisa admin atau karyawan (untuk achievement sendiri)
-  if (!token) {
-    throw new Error('Token otentikasi tidak ditemukan.');
-  }
-  return await api.delete(`/user/employees/achievements/${id}`, { // Sesuaikan endpoint sesuai routes/api.php
+  const token = getAuthToken();
+  return await api.delete(`/user/employees/achievements/${id}`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
-

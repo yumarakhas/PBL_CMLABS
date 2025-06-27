@@ -21,6 +21,7 @@ interface AchievementData {
   id?: number;
   file_path?: string;
   original_filename?: string;
+  achievements?: any;
   [key: string]: any;
 }
 
@@ -53,6 +54,7 @@ function EmployeeAvatar({ src, alt }: AvatarProps) {
 }
 
 type AchievementType = {
+  id?: number; 
   file_path?: string;
   original_filename?: string;
 };
@@ -143,29 +145,23 @@ export default function EmployeeDatabasetPage() {
       if (Array.isArray(res)) {
         // Jika response langsung berupa array
         employeesData = res;
-      } else if (res.data && Array.isArray(res.data)) {
-        // Jika data ada di res.data
+      } else if (Array.isArray(res.data)) {
+        // Jika data langsung berupa array di res.data
         employeesData = res.data;
-      } else if (res.employees && Array.isArray(res.employees)) {
-        // Jika data ada di res.employees
-        employeesData = res.employees;
       } else if (
         res.data &&
-        res.data.employees &&
         Array.isArray(res.data.employees)
       ) {
-        // Jika data ada di res.data.employees
+        // Jika data berupa objek dengan properti employees
         employeesData = res.data.employees;
       } else {
-        console.error("Unexpected response structure:", res);
-        // Set employeesData sebagai array kosong jika struktur tidak dikenali
+        console.error("Struktur response tidak dikenali:", res);
         employeesData = [];
       }
 
-      const employees = employeesData.map((emp) => {
+      const employees = (employeesData as any[]).map((emp) => {
         let achievements = [];
 
-        // Handle berbagai format achievements dari backend
         if (emp.achievements) {
           if (Array.isArray(emp.achievements)) {
             achievements = emp.achievements;
@@ -173,23 +169,20 @@ export default function EmployeeDatabasetPage() {
             try {
               achievements = JSON.parse(emp.achievements);
             } catch (e) {
-              console.warn(
-                "Failed to parse achievements for employee:",
-                emp.id,
-                e
-              );
+              console.warn("Failed to parse achievements for employee:", emp.id, e);
               achievements = [];
             }
           } else if (typeof emp.achievements === "object") {
-            achievements = [emp.achievements]; // Single object to array
+            achievements = [emp.achievements];
           }
         }
 
-        const validAchievements = achievements.filter(
-          (achievement) =>
+        const validAchievements = (achievements as AchievementType[]).filter(
+          (achievement: AchievementType) =>
             achievement &&
-            (achievement.file_path || achievement.original_filename)
+            (achievement.file_path !== undefined || achievement.original_filename !== undefined)
         );
+
 
         return {
           ...emp,
