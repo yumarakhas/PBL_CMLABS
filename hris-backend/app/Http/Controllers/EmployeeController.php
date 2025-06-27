@@ -154,7 +154,7 @@ class EmployeeController extends Controller
             'Achievements.*.file' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
         ]);
 
-        $validated['user_id'] = 1;
+        // $validated['user_id'] = 1;
         $validated['Company_id'] = 1;
         // $validated['user_id'] = auth()->id();
         // $validated['Company_id'] = auth()->user()->company_id;
